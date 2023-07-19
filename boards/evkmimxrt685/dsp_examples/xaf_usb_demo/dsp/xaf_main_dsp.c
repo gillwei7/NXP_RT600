@@ -30,6 +30,9 @@
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
 #include "pin_mux.h"
+// TYM DSP add >>
+#include "FlowEngine.h"
+// TYM DSP add <<
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -129,6 +132,7 @@ static void DSP_XAF_Init(dsp_handle_t *dsp)
 
 static int handleMSG_GENERAL(dsp_handle_t *dsp, srtm_message *msg)
 {
+	DSP_PRINTF(" handleMSG_GENERAL\r\n");
     switch (msg->head.command)
     {
         /* Return SDK key component versions to host*/
@@ -174,6 +178,7 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
     switch (msg->head.command)
     {
         case SRTM_Command_UsbSpeakerStart:
+        	DSP_PRINTF(" SRTM_Command_UsbSpeakerStart\r\n");
             /* Param 0 USB buffer */
             /* Param 1 USB buffer size */
             /* Param 2 number of channels */
@@ -209,10 +214,12 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
             break;
 
         case SRTM_Command_UsbSpeakerData:
+
             /* Param 0 USB buffer */
             /* Param 1 USB buffer size */
             if (msg->param[0] == 0)
             {
+//            	DSP_PRINTF(" SRTM_Command_UsbSpeakerData1\r\n");
                 msg->head.type = SRTM_MessageTypeNotification;
                 msg->error     = SRTM_Status_InvalidParameter;
             }
@@ -223,7 +230,7 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
 #else
                 remote_addr = (char *)msg->param[0];
 #endif
-
+//                DSP_PRINTF(" SRTM_Command_UsbSpeakerData2\r\n");
                 DSP_AudioWriteRing(dsp, remote_addr, msg->param[1]);
                 // DSP_PRINTF("DSP_AudioWriteRing: %u\n\r", DSP_AudioWriteRing(dsp, remote_addr, msg->param[1]));
                 // DSP_PRINTF("[USB Data] Addr: 0x%07X; Length: %d;\n\r", msg->param[0], msg->param[1]);
@@ -285,6 +292,7 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
 
 #if XA_CLIENT_PROXY
         case SRTM_Command_FilterCfg:
+        	DSP_PRINTF("SRTM_Command_FilterCfg\r\n");
             msg->error = client_proxy_filter(dsp, msg->param[0]);
             break;
 #endif
@@ -297,7 +305,17 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
 
     return 0;
 }
+// TYM DSP add >>
+static int handleMSG_FLOWCMD(dsp_handle_t *dsp, srtm_message *msg)
+{
+	DSP_PRINTF("\n[handleMSG_FLOWCMD]\r\n");
+//	DSP_PRINTF("msg string: %s\r\n", msg->flow_msg);
+//	DSP_PRINTF("msg param: %d\r\n", msg->param[0]);
+	FLOWDSP_SetParam(dsp, msg->flow_msg, msg->param[0]);
 
+	return 0;
+}
+// TYM DSP add <<
 static int DSP_MSG_Process(dsp_handle_t *dsp, srtm_message *msg)
 {
     srtm_message_type_t input_type = msg->head.type;
@@ -318,6 +336,12 @@ static int DSP_MSG_Process(dsp_handle_t *dsp, srtm_message *msg)
         case SRTM_MessageCategory_AUDIO:
             handleMSG_AUDIO(dsp, msg);
             break;
+        // TYM DSP add >>
+        case SRTM_MessageCategory_FLOWCMD:
+        	//DSP_PRINTF("[TYM] SRTM_MessageCategory_FLOWCMD\r\n");
+            handleMSG_FLOWCMD(dsp, msg);
+            break;
+        // TYM DSP add <<
         default:
             msg->head.type = SRTM_MessageTypeNotification;
             msg->error     = SRTM_Status_InvalidMessage;
@@ -376,7 +400,6 @@ int DSP_Main(void *arg, int wake_value)
         {
             xos_fatal_error(status, "Failed to get item from RPMsg queue.\r\n");
         }
-
         /* Process request */
         status = DSP_MSG_Process(dsp, &msg);
     }
@@ -414,6 +437,12 @@ int main(void)
     I2S_TxGetDefaultConfig(&s_TxConfig);
     I2S_TxInit(I2S1, &s_TxConfig);
 #endif
+// TYM DSP add >>
+//    FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
+//    FlowEngine*	engine = FlowEngine_create("engine", NULL, 1, 1);
+//    FlowEngine_prepare(engine, 48000, 48);
+//    TEST_ALL_AOS();
+// TYM DSP add <<
 
     /* Iniitalize DMA1 which will be shared by capturer and renderer. */
     DMA_Init(DMA1);

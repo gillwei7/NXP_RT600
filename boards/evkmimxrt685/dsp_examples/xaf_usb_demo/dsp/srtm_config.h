@@ -129,6 +129,7 @@ typedef struct _srtm_message
     srtm_packet_head_t head;             /*!< SRTM raw data, including header and payload for CommMessage */
     uint32_t error;                      /*!< SRTM message error status */
     uint32_t param[SRTM_CMD_PARAMS_MAX]; /*!< SRTM user defined message params */
+    char* flow_msg; // TYM DSP add
 } srtm_message;
 
 /**
@@ -149,6 +150,7 @@ typedef enum _srtm_message_category
 {
     SRTM_MessageCategory_GENERAL = 0x00U,
     SRTM_MessageCategory_AUDIO,
+	SRTM_MessageCategory_FLOWCMD, // TYM DSP add
     SRTM_MessageCategory_NN,
 } srtm_message_category_t;
 

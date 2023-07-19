@@ -655,6 +655,7 @@ static void SHELL_ProcessCommand(shell_context_handle_t *shellContextHandle, con
             tmpCommand = NULL;
         }
     }
+    printf("[TYM][SHELL_ProcessCommand] CmdString: %s, CmdLen: %d\r\n",tmpCommandString, tmpCommandLen);
 
     if ((tmpCommand != NULL) && (flag == 1U))
     {
