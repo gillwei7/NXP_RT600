@@ -1,2 +1,3 @@
 boards/evkmimxrt685/dsp_examples/xaf_usb_demo/cm33/Debug/
+boards/evkmimxrt685/dsp_examples/xaf_usb_demo/cm33/Release/
 *.launch

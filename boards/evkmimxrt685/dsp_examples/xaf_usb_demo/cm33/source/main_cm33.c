@@ -45,7 +45,6 @@ void CTIMER_SOF_TOGGLE_HANDLER_PLL(uint32_t i);
 #else
 extern void USB_DeviceCalculateFeedback(void);
 #endif
-int BOARD_CODEC_Init(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -80,36 +79,6 @@ static app_handle_t app;
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
-int BOARD_CODEC_Init(void)
-{
-    PRINTF("Configure WM8904 codec\r\n");
-
-    if (CODEC_Init(&g_codecHandle, &g_boardCodecConfig) != kStatus_Success)
-    {
-        PRINTF("WM8904_Init failed!\r\n");
-        return -1;
-    }
-
-    /* Invert the DAC data in order to output signal with correct polarity - set DACL_DATINV and DACR_DATINV = 1 */
-    if (WM8904_WriteRegister((wm8904_handle_t *)g_codecHandle.codecDevHandle, WM8904_AUDIO_IF_0, 0x1850) !=
-        kStatus_WM8904_Success)
-    {
-        PRINTF("WM8904 configuration failed!\r\n");
-        return -1;
-    }
-
-    /* Initial volume kept at 75% for hearing safety. */
-    /* Adjust it to your needs between 0 - 100*/
-    if (CODEC_SetVolume(&g_codecHandle, kCODEC_PlayChannelHeadphoneLeft | kCODEC_PlayChannelHeadphoneRight, 75) !=
-        kStatus_Success)
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
 void USB_DeviceClockInit(void)
 {
     uint8_t usbClockDiv = 1;
@@ -288,13 +257,6 @@ int main(void)
     PRINTF("DSP audio framework demo start\r\n");
     PRINTF("******************************\r\n");
     PRINTF("\r\n");
-
-    ret = BOARD_CODEC_Init();
-    if (ret)
-    {
-        PRINTF("CODEC_Init failed!\r\n");
-        return -1;
-    }
 
     /* Initialize RPMsg IPC interface between ARM and DSP cores. */
     BOARD_DSP_IPC_Init();
