@@ -102,7 +102,7 @@ static uint32_t _ringbuf_read_internal(ringbuf_t *rb, uint8_t *data, uint32_t si
         /* Underrun - cap read at max available. */
         size = rb->occ;
     }
-
+//    printf("[TYM]size: %d, remaining: %d, rb->size: %d, rb->head: %d\r\n",size,remaining, rb->size, rb->head);
     if (size > remaining)
     {
         if (data)

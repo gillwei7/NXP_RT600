@@ -1,0 +1,20 @@
+xa-capturer-dmic.o: \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\testxa_af_hostless\test\plugins\nxp\capturer\xa-capturer-dmic.c \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa-capturer-api.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_type_def.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_error_standards.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_apicmd_standards.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_memory_standards.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\dsp\audio_framework\libxa_af_hostless\include\xf-debug.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_dma.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_common.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\fsl_device_registers.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\MIMXRT685S_dsp.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\system_MIMXRT685S_dsp.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\MIMXRT685S_dsp_features.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_common_dsp.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_clock.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_reset.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_dmic.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_dmic_dma.h \
+  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_dma.h

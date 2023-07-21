@@ -295,7 +295,7 @@ int srtm_usb_speaker_init(dsp_handle_t *dsp, unsigned int *pCmdParams)
         comp_config[cid].num_output_buffers = comp_noutbuf[cid];
         comp_config[cid].comp_type          = comp_type[cid];
         comp_config[cid].pp_inbuf = comp_ninbuf[cid] > 0 ? (pVOID(*)[XAF_MAX_INBUFS]) & usbSpeaker_inbuf[0] : NULL;
-
+        DSP_PRINTF("[TYM][DSP_USB_SPEAKER] id[%d]:%s, in_num: %d, out_num: %d,  type: %d\r\n", i, comp_config[cid].comp_id, comp_config[cid].num_input_buffers, comp_config[cid].num_output_buffers, comp_config[cid].comp_type);
         /* Create component */
         ret = xaf_comp_create(dsp->audio_device, comp_get_pointer(dsp, cid, true), &comp_config[cid]);
         if (ret != XAF_NO_ERR)
@@ -306,6 +306,7 @@ int srtm_usb_speaker_init(dsp_handle_t *dsp, unsigned int *pCmdParams)
 
         /* Setup component */
         comp_setup[cid](comp_get_pointer(dsp, cid, false), &comp_format[cid]);
+        DSP_PRINTF("[TYM][DSP_USB_SPEAKER] id[%d]:%s, sRate: %d, ch: %d,  width: %d\r\n", i, comp_config[cid].comp_id, comp_format[cid].sample_rate, comp_format[cid].channels, comp_format[cid].pcm_width);
 
         /* Start component */
         ret = xaf_comp_process(dsp->audio_device, comp_get_pointer(dsp, cid, false), NULL, 0, XAF_START_FLAG);

@@ -34,10 +34,16 @@ static void initMessage(srtm_message *msg);
 static shell_status_t shellEcho(shell_handle_t shellHandle, int32_t argc, char **argv);
 static shell_status_t shellUsbSpeaker(shell_handle_t shellHandle, int32_t argc, char **argv);
 static shell_status_t shellUsbMic(shell_handle_t shellHandle, int32_t argc, char **argv);
-
+// TYM DSP add >>
+static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+// TYM DSP add <<
 #if XA_CLIENT_PROXY
 static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, char **argv);
 #endif
+// TYM DSP add >>
+static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+// TYM DSP add <<
+
 /*${prototype:end}*/
 
 /*******************************************************************************
@@ -89,7 +95,9 @@ SHELL_COMMAND_DEFINE(usb_mic,
                      "    stop           Stop record and playback on usb microphone audio device\r\n",
                      shellUsbMic,
                      1);
-
+// TYM DSP add >>
+SHELL_COMMAND_DEFINE(flow, "\r\n\"flow\": Send command to control FlowDSP param\r\n", shellFlowDSP, 2);
+// TYM DSP add <<
 static bool usb_playing   = false;
 static bool usb_recording = false;
 
@@ -328,6 +336,30 @@ static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, c
     }
 }
 #endif
+// TYM DSP add >>
+static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv)
+{
+    srtm_message msg = {0};
+
+    initMessage(&msg);
+
+    msg.head.category = SRTM_MessageCategory_FLOWCMD;
+    msg.head.command = SRTM_Command_FlowDSPSetParam;
+    if (usb_playing)
+    {
+		PRINTF("[CM33] Send flow command. \r\n");
+		msg.flow_msg = (char *) argv[1];
+		msg.param[0] = atoi(argv[2]);
+
+		g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+    }
+    else
+    {
+    	PRINTF("[CM33] USB audio is not ready. \r\n");
+    }
+    return kStatus_SHELL_Success;
+}
+// TYM DSP add <<
 
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg)
 {
@@ -342,7 +374,9 @@ void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *ar
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(eap));
 #endif
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(usb_mic));
-
+    // TYM DSP add >>
+    SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(flow));
+    // TYM DSP add <<
     g_handleShellMessageCallback     = handleShellMessageCallback;
     g_handleShellMessageCallbackData = arg;
 
@@ -388,7 +422,7 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
             break;
 
         case SRTM_MessageCategory_AUDIO:
-            if (usb_playing && (msg->head.command != SRTM_Command_FilterCfg) &&
+            if (usb_playing && (msg->head.command != SRTM_Command_FilterCfg) && (msg->head.command != SRTM_Command_FlowDSPSetParam) &&
                 (msg->head.command < SRTM_Command_UsbSpeakerStart || msg->head.command > SRTM_Command_UsbSpeakerError))
             {
                 PRINTF("This command cannot be processed at this time because USB is being played!\r\n");
@@ -599,6 +633,21 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                     break;
                 }
 #endif
+                // TYM DSP add >>
+                case SRTM_Command_FlowDSPSetParam:
+                {
+                	if (msg->error != SRTM_Status_Success)
+                	{
+                		PRINTF("DSP FlowDSP set parameter failed! return error = %d\r\n", msg->error);
+                	}
+                	else
+                	{
+                		PRINTF("[DSP->MCU] DSP FlowDSP set parameter success!\r\n");
+                		PRINTF("[DSP->MCU] Set command: %s\r\n",msg->flow_msg);
+                	}
+                	break;
+                }
+                // TYM DSP add <<
                 default:
                     PRINTF("Incoming unknown message category %d \r\n", msg->head.category);
                     break;

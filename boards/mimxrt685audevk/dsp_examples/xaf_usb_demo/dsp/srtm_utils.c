@@ -19,12 +19,74 @@
 #include "xaf-utils-test.h"
 
 #include "fsl_gpio.h"
-
+// TYM DSP add >>
+#include "FlowEngine.h"
+// TYM DSP add <<
 #define AUDIO_BUFFER_FILL_THRESHOLD (16 * 1024)
-
+int test_num = 0;
 /*******************************************************************************
  * Utility Functions
  ******************************************************************************/
+
+// TYM DSP add >>
+#define BUF_SIZE 100*1024
+uint8_t MEMPOOL_BUF[BUF_SIZE];
+
+typedef enum {
+	HAL_GPT_STATUS_ERROR_RESTART_ERROR	 = -7,	/**< The SW GPT is restart the same timer that has not expired. */
+	HAL_GPT_STATUS_ERROR_START_TOO_LONG	 = -6,	 /**< The user start time_out? is too long. */
+	HAL_GPT_STATUS_ERROR_PORT_USE_FULL	 = -5,/**< The SW GPT users full. */
+	HAL_GPT_STATUS_ERROR_PORT_USED	 = -4,	/**< The timer has beed used. */
+	HAL_GPT_STATUS_ERROR	 = -3,	/**< GPT function error occurred. */
+	HAL_GPT_STATUS_ERROR_PORT	 = -2,	/**< A wrong GPT port is set. */
+	HAL_GPT_STATUS_INVALID_PARAMETER = -1,	/**< An invalid parameter. */
+	HAL_GPT_STATUS_OK	= 0	/**< No error occurred during the function call.*/
+} hal_gpt_status_t;
+
+typedef enum {
+
+	HAL_GPT_CLOCK_SOURCE_32K = 0,	/**< Set the GPT clock source to 32kHz, 1 tick = 1/32768 seconds. */
+
+	HAL_GPT_CLOCK_SOURCE_1M = 1	/**< Set the GPT clock source to 1MHz, 1 tick = 1 microsecond.*/
+
+} hal_gpt_clock_source_t;
+
+hal_gpt_status_t hal_gpt_get_free_run_count(hal_gpt_clock_source_t clock_source, uint32_t *count)
+{
+	return 0;
+}
+
+//extern void TEST_ALL_AOS(void);
+FlowEngine*	engine;
+
+void Flow_path_initialize()
+{
+		printf("[TYM] Flow_path_initialize\r\n");
+	    FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
+	    engine = FlowEngine_create("engine", NULL, 2, 2);
+	    FlowEngine_prepare(engine, 48000, 48);
+
+	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/1/");
+	    FlowEngine_query_cmd(engine, "clearLayout/");
+	    FlowEngine_query_cmd(engine, "init/5/");
+	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_1/3/-1/-1/-1/0/");
+	    FlowEngine_query_cmd(engine, "obj/IN/IN_1/0/-1/-1/-1/0/");
+	    FlowEngine_query_cmd(engine, "obj/IN/IN_2/1/-1/-1/-1/0/");
+	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_2/4/-1/-1/-1/0/");
+	    FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/2/2/2/1/0/");
+	    FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/-40.0/0/0/");
+	    FlowEngine_query_cmd(engine, "reprepare/");
+	    FlowEngine_query_cmd(engine, "buildProcStep/");
+	    FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
+	    FlowEngine_query_cmd(engine, "wire/IN_2@0/GAIN_1@1/");
+	    FlowEngine_query_cmd(engine, "wire/GAIN_1@0/OUT_1@0/");
+	    FlowEngine_query_cmd(engine, "wire/GAIN_1@1/OUT_2@0/");
+	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/0/");
+
+}
+
+// TYM DSP add <<
+
 
 /* Wrap stdlib malloc() for audio framework allocator */
 void *DSP_Malloc(int32_t size, int32_t id)
@@ -216,6 +278,38 @@ void DSP_SendUsbError(dsp_handle_t *dsp, usb_device_type_t usb_dev)
     rpmsg_lite_send(dsp->rpmsg, dsp->ept, MCU_EPT_ADDR, (char *)&msg, sizeof(srtm_message), RL_DONT_BLOCK);
     xos_mutex_unlock(&dsp->rpmsgMutex);
 }
+// TYM DSP add >>
+void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
+{
+    srtm_message msg = {0};
+
+    msg.head.type         = SRTM_MessageTypeRequest;
+    msg.head.majorVersion = SRTM_VERSION_MAJOR;
+    msg.head.minorVersion = SRTM_VERSION_MINOR;
+
+    msg.head.category = SRTM_MessageCategory_AUDIO;
+    msg.head.command  = SRTM_Command_FlowDSPSetParam;
+    msg.flow_msg = dstMsg;
+    xos_mutex_lock(&dsp->rpmsgMutex);
+    rpmsg_lite_send(dsp->rpmsg, dsp->ept, MCU_EPT_ADDR, (char *)&msg, sizeof(srtm_message), RL_DONT_BLOCK);
+    xos_mutex_unlock(&dsp->rpmsgMutex);
+}
+
+void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
+{
+	char* valStr[4];
+
+	sprintf(valStr,"%d",value);
+	char dest[64] = "setCoord/";
+	char* postStr = "/0/0/";
+	strcat(dest,paramStr);
+	strcat(dest,valStr);
+	strcat(dest,postStr);
+	DSP_PRINTF("[FLOWDSP_SetParam] dest: %s\r\n", dest);
+	FlowEngine_query_cmd(engine,dest);
+	FlowDSP_SendCmdBack(dsp, &dest);
+}
+// TYM DSP add <<
 
 /* Thread for processing DSP pipeline
  *
@@ -236,7 +330,7 @@ int DSP_ProcessThread(void *arg, int wake_value)
     bool cmd_pending = true;
 
     DSP_PRINTF("[DSP_ProcessThread] start\r\n");
-
+    Flow_path_initialize();
     ret = xaf_comp_process(NULL, ctx->comp, NULL, 0, XAF_EXEC_FLAG);
     if (ret != XAF_NO_ERR)
     {
@@ -284,7 +378,7 @@ int DSP_ProcessThread(void *arg, int wake_value)
                 DSP_PRINTF("[DSP_ProcessThread] Error, exiting\r\n");
                 return -1;
             }
-
+//            DSP_PRINTF("[DSP_ProcessThread][TYM] Request data from cm33\n");
             cmd_pending = false;
         }
 
@@ -300,7 +394,29 @@ int DSP_ProcessThread(void *arg, int wake_value)
             buffer_len = (uint32_t)info[1];
 
             read_size = ctx->audio_read(ctx, buffer, buffer_len);
+//            int16_t temp = (int16_t)buffer[2 * i] + ((int16_t) buffer[2 * i + 1] << 8);
+//            DSP_PRINTF("dst : %d\r\n", temp);
+//            DSP_PRINTF("[TYM] read_size : %d, buffer_len: %d\r\n", read_size, buffer_len);
 
+    	    FlowEngine_ProcessInt16(engine, buffer, buffer);
+        	// TYM¡@DSP >>
+//            test_num++;
+//            int8_t tempB1 = 0;
+//            int8_t tempB2 = 0;
+//            if (test_num % 2000 == 0){
+//            	for (int i=0; i<10; i++)
+//				{
+//            		tempB1 = buffer[2 * i];
+//            		tempB2 = buffer[2 * i + 1];
+//                    int16_t temp = (int16_t)buffer[2 * i] + ((int16_t) buffer[2 * i + 1]) << 8;
+//                    DSP_PRINTF("[TYM]dst : %d\r\n", temp);
+////					DSP_PRINTF("src audioBuffer[%d]: %d\r\n",i, ctx->audioBuffer->buf[i]);
+////					DSP_PRINTF("dst buffer[%d]: %d\r\n",i, buffer[i]);
+////
+//				}
+//            	test_num =0;
+//            }
+            // TYM DSP <<
             if (read_size > 0)
             {
                 ret = xaf_comp_process(NULL, ctx->comp, (void *)buffer, read_size, XAF_INPUT_READY_FLAG);
@@ -322,6 +438,7 @@ int DSP_ProcessThread(void *arg, int wake_value)
             /* Consume output from pipeline */
             buffer     = (char *)info[0];
             buffer_len = (uint32_t)info[1];
+            DSP_PRINTF("[DSP_ProcessThread][TYM] XAF_OUTPUT_READY, onsume output from pipeline\n");
 
             if (buffer_len == 0)
             {

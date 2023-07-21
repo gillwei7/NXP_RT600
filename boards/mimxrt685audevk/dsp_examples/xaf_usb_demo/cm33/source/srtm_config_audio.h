@@ -54,6 +54,7 @@ typedef enum _srtm_rt600_audio_command
     SRTM_Command_UsbMicEnd,       /*!< Usb recording complete */
     SRTM_Command_UsbMicStop,      /*!< Stop recording from USB */
     SRTM_Command_UsbMicError,     /*!< Stop record due to USB error*/
+	SRTM_Command_FlowDSPSetParam, /*!< Set FlowDSP parameter [TYM DSP add]*/
 } srtm_audio_command_t;
 
 #endif /* __SRTM_CONFIG_AUDIO_H__ */

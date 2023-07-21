@@ -90,5 +90,7 @@ int DSP_ProcessThread(void *arg, int wake_value);
 int DSP_BufferThread(void *arg, int wake_value);
 void DSP_SendUsbEnd(dsp_handle_t *dsp, usb_device_type_t usb_dev);
 void DSP_SendUsbError(dsp_handle_t *dsp, usb_device_type_t usb_dev);
-
+// TYM DSP add >>
+void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value);
+// TYM DSP add <<
 #endif /* __SRTM_UTILS_H__ */
