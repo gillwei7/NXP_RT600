@@ -22,9 +22,6 @@
 #include "composite.h"
 
 #include "dsp_config.h"
-#include "fsl_cs42448.h"
-#include "fsl_codec_common.h"
-#include "fsl_codec_adapter.h"
 #include "fsl_power.h"
 #include "fsl_pca9420.h"
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
@@ -46,22 +43,10 @@ void CTIMER_SOF_TOGGLE_HANDLER_PLL(uint32_t i);
 #else
 extern void USB_DeviceCalculateFeedback(void);
 #endif
-int BOARD_CODEC_Init(void);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-codec_handle_t g_codecHandle;
-cs42448_config_t g_cs42448Config = {
-    .DACMode      = kCS42448_ModeSlave,
-    .ADCMode      = kCS42448_ModeSlave,
-    .reset        = NULL,
-    .master       = false,
-    .i2cConfig    = {.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE},
-    .format       = {.sampleRate = 48000U, .bitWidth = 16U},
-    .bus          = kCS42448_BusI2S,
-    .slaveAddress = CS42448_I2C_ADDR,
-};
-codec_config_t g_boardCodecConfig = {.codecDevType = kCODEC_CS42448, .codecDevConfig = &g_cs42448Config};
 extern usb_device_composite_struct_t g_composite;
 
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
@@ -69,29 +54,10 @@ ctimer_callback_t *cb_func_pll[] = {(ctimer_callback_t *)CTIMER_SOF_TOGGLE_HANDL
 static ctimer_config_t ctimerInfoPll;
 #endif
 static app_handle_t app;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
-int BOARD_CODEC_Init(void)
-{
-    PRINTF("Configure cs42448 codec\r\n");
-
-    if (CODEC_Init(&g_codecHandle, &g_boardCodecConfig) != kStatus_Success)
-    {
-        PRINTF("cs42448_Init failed!\r\n");
-        return -1;
-    }
-
-    if (CODEC_SetVolume(&g_codecHandle, kCODEC_PlayChannelHeadphoneLeft | kCODEC_PlayChannelHeadphoneRight,
-                        DEMO_CODEC_VOLUME) != kStatus_Success)
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
 void USB_DeviceClockInit(void)
 {
     uint8_t usbClockDiv = 1;
@@ -258,8 +224,6 @@ int main(void)
     CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
     SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
 
-    g_cs42448Config.i2cConfig.codecI2CSourceClock = CLOCK_GetFlexCommClkFreq(2);
-    g_cs42448Config.format.mclk_HZ                = CLOCK_GetMclkClkFreq();
     USB_DeviceClockInit();
 
     PRINTF("\r\n");
@@ -267,13 +231,6 @@ int main(void)
     PRINTF("DSP audio framework demo start\r\n");
     PRINTF("******************************\r\n");
     PRINTF("\r\n");
-
-    ret = BOARD_CODEC_Init();
-    if (ret)
-    {
-        PRINTF("CODEC_Init failed!\r\n");
-//        return -1;
-    }
 
     /* Initialize RPMsg IPC interface between ARM and DSP cores. */
     BOARD_DSP_IPC_Init();
