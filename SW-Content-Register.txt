@@ -70,17 +70,6 @@ usb                        Name: USB
                            Location: middleware/usb                          
                            Origin: NXP (BSD-3-Clause)                        
 
-issdk                      Name: ISSDK                                       
-                           Version: 1.7                                      
-                           Outgoing License: BSD-3-Clause                    
-                           License File: COPYING-BSD-3                       
-                           Format: source code                               
-                           Description: NXP IoT Sensing SDK. It combines a   
-                           set of robust Sensor Drivers and algorithms along 
-                           with example applications.                        
-                           Location: middleware/issdk                        
-                           Origin: NXP (BSD-3-Clause)                        
-
 sdmmc                      Name: SD MMC SDIO Card middleware                 
                            Version: 2.2.7                                    
                            Outgoing License: BSD-3-Clause                    
@@ -160,59 +149,6 @@ rpmsg_lite                 Name: RPMsg-Lite
                            Origin: Mentor Graphics Corporation & community   
                            contributors                                      
                            Url: https://github.com/NXPmicro/rpmsg-lite       
-
-erpc                       Name: eRPC                                        
-                           Version: 1.10.0                                   
-                           Outgoing License: BSD-3-Clause                    
-                           License File: middleware/multicore/erpc/LICENSE   
-                           Format: source code                               
-                           Description: Embedded Remote Procedure Call       
-                           Location: middleware/multicore/erpc               
-                           Origin: NXP & community contributors              
-                           Url: https://github.com/EmbeddedRPC/erpc          
-
-the_bus_pirate             Name: The Bus Pirate                              
-                           Version: NA                                       
-                           Outgoing License: Open Source - CC0 (Public Domain
-                           Dedication License)                               
-                           License File:                                     
-                           http://code.google.com/p/the-bus-pirate/          
-                           Format: source code                               
-                           Description: OS independent serial interface      
-                           Location:                                         
-                           middleware/multicore/erpc/erpc_c/port/erpc_serial.
-                           h,                                                
-                           middleware/multicore/erpc/erpc_c/port/erpc_serial.
-                           cpp                                               
-                           Origin: Community                                 
-                           Url: http://code.google.com/p/the-bus-pirate/     
-
-cpp_template               Name: CPP Template                                
-                           Version: NA                                       
-                           Outgoing License: Open Source - MIT               
-                           License File:                                     
-                           middleware/multicore/erpc/erpcgen/src/cpptemplate/
-                           LICENSE.txt                                       
-                           Format: source code                               
-                           Description: CPP Template                         
-                           Location:                                         
-                           middleware/multicore/erpc/erpcgen/src/cpptemplate 
-                           Origin: Ryan Ginstrom & Martinho Fernandes        
-
-cpp_option_parser          Name: C++ option-parser                           
-                           Version: NA                                       
-                           Outgoing License: Brad Appleton's license         
-                           License File:                                     
-                           http://www.bradapp.com/ftp/src/libs/C++/Options.ta
-                           r.gz , see README file                            
-                           Format: Plain Text                                
-                           Description: C++ option-parser                    
-                           Location:                                         
-                           middleware/multicore/erpc/erpcgen/src/options.cpp 
-                           Origin: Brad Appleton bradapp@enteract.com        
-                           Url:                                              
-                           http://www.bradapp.com/ftp/src/libs/C++/Options.ht
-                           ml                                                
 
 emwin                      Name: emWin                                       
                            Version: 6.28                                     
@@ -486,31 +422,6 @@ VIT                        Name: VIT_v4.7.5
                            Description: Voice Intelligent Technology library 
                            Location: middleware/vit                          
                            Origin: NXP (Proprietary)                         
-
-bt_ble_hoststack           Name: Bluetooth and Bluetooth Low Energy Host     
-                           Stack                                             
-                           Version: 16.5.16                                  
-                           Outgoing License: LA_OPT_NXP_Software_License.txt 
-                           v39 August 2022 - Additional distribution license 
-                           granted - License in Section 2.3 applies          
-                           License File: LA_OPT_NXP_Software_License.txt     
-                           Format: Source, Binary libraries                  
-                           Description: Bluetooth and Bluetooth Low Energy   
-                           Host Stack.                                       
-                           Location: middleware/wireless/ethermind           
-                           Origin: Mindtree                                  
-
-EdgeFast_PAL               name: EdgeFast Protocol Abstraction Layer         
-                           version: 0.1.0                                    
-                           Outgoing License: BSD-3-Clause                    
-                           License File: COPYING-BSD-3                       
-                           Format: source code, header files                 
-                           Description: EdgeFast Bluetooth PAL               
-                           Location: middleware/edgefast_bluetooth           
-                           Origin: NXP (BSD-3-Clause) Zephyr BT/BLE Host     
-                           stack (Apache-2.0) -                              
-                           https://github.com/zephyrproject-rtos/zephyr/tree/
-                           v2.6-branch/subsys/bluetooth                      
 
 MCUBoot                    Name: MCUBoot                                     
                            Version: 1.9.0                                    
