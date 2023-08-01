@@ -408,7 +408,15 @@ static void evk_hw_renderer_init(void* ptr)
     uint8_t dmaWidth = d->pcm_width * d->codec_channels > 16 ? 4 : 2;
 
     I2S_TxGetDefaultConfig(&s_TxConfig);
-
+#if 1
+//    s_TxConfig.divider = (24576000/48000/32/8);
+//    s_TxConfig.masterSlave = 0x3;
+    s_TxConfig.mode = 0x02;
+	s_TxConfig.dataLength = 32U;
+	s_TxConfig.frameLength = 32 * 8U;
+	s_TxConfig.position = 1U;
+	s_TxConfig.pack48 =true;
+#else
     s_TxConfig.dataLength = d->codec_pcm_width;
     /* Set 32 bit frameLength even for mono channel.
      * Use may vary with different hardware codecs. */
@@ -417,7 +425,7 @@ static void evk_hw_renderer_init(void* ptr)
     s_TxConfig.sckPol = d->i2s_sck_polarity;
     s_TxConfig.wsPol = d->i2s_ws_polarity;
     s_TxConfig.position = d->position;
-
+#endif
     /* Configure I2S master/slave based on configured input */
     if (d->i2s_master)
     {
@@ -753,8 +761,8 @@ static XA_ERRORCODE xa_renderer_init(XARenderer *d, WORD32 i_idx, pVOID pv_value
         memset(d, 0, sizeof(*d));
 
         /* ...default to 48 kHz / 16-bit / 2-channel */
-        d->channels = 2;
-        d->pcm_width = 16;
+        d->channels = 8;//2;	// TYM DSP Tofu: chg from 2 to 8
+        d->pcm_width = 32;//16;	// TYM DSP Tofu: chg from 16 to 32
 #if I2S_SUPPORT_44100_HZ
         d->rate = 44100;
 #else
@@ -771,7 +779,7 @@ static XA_ERRORCODE xa_renderer_init(XARenderer *d, WORD32 i_idx, pVOID pv_value
         /* ...hardware defaults */
         d->i2s_device = 1;
         d->i2s_master = 1;
-        d->i2s_mode = kI2S_ModeI2sClassic;
+        d->i2s_mode = kI2S_ModeDspWsShort;	// TYM DSP chg from classic i2s to TDM
         d->i2s_sck_polarity = 0;
         d->i2s_ws_polarity = 0;
         d->position = 0;

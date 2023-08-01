@@ -36,13 +36,11 @@ static shell_status_t shellUsbSpeaker(shell_handle_t shellHandle, int32_t argc, 
 static shell_status_t shellUsbMic(shell_handle_t shellHandle, int32_t argc, char **argv);
 // TYM DSP add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, char **argv);
 // TYM DSP add <<
 #if XA_CLIENT_PROXY
 static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, char **argv);
 #endif
-// TYM DSP add >>
-static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
-// TYM DSP add <<
 
 /*${prototype:end}*/
 
@@ -97,6 +95,12 @@ SHELL_COMMAND_DEFINE(usb_mic,
                      1);
 // TYM DSP add >>
 SHELL_COMMAND_DEFINE(flow, "\r\n\"flow\": Send command to control FlowDSP param\r\n", shellFlowDSP, 2);
+SHELL_COMMAND_DEFINE(line,
+					 "\r\n\"line\": Perform line in & out and playback on DSP\r\n"
+					 "  USAGE: line [start]\r\n"
+					 "	  start			Start line in & out and playback on DSP\r\n",
+					 shellLineInOut,
+					 1);
 // TYM DSP add <<
 static bool usb_playing   = false;
 static bool usb_recording = false;
@@ -175,12 +179,21 @@ static shell_status_t shellUsbSpeaker(shell_handle_t shellHandle, int32_t argc, 
             /* Param 3 sampling_rate */
             /* Param 4 pcm_width */
             msg.param[0] = (uint32_t)(&audioPlayDataBuff[0]);
+#if 0
             msg.param[1] = 2 * ((0U != g_composite.audioUnified.audioPlayTransferSize) ?
                                     g_composite.audioUnified.audioPlayTransferSize :
                                     HS_ISO_OUT_ENDP_PACKET_SIZE);
             msg.param[2] = AUDIO_IN_FORMAT_CHANNELS;
             msg.param[3] = AUDIO_IN_SAMPLING_RATE;
             msg.param[4] = AUDIO_IN_FORMAT_BITS;
+#else
+            // TYM DSP add tofu>>
+            msg.param[1] = 1024;
+            msg.param[2] = 8;
+            msg.param[3] = 48000;
+            msg.param[4] = 32;
+            // TYM DSP add tofu<<
+#endif
 
             g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
         }
@@ -359,6 +372,30 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     }
     return kStatus_SHELL_Success;
 }
+
+static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, char **argv)
+{
+    srtm_message msg = {0};
+
+    initMessage(&msg);
+
+    msg.head.category = SRTM_MessageCategory_AUDIO;
+    msg.head.command = SRTM_Command_LINEINOUT;
+
+    /* Param 0 Number of Channels*/
+    /* Param 1 Sampling Rate*/
+    /* Param 2 PCM bit Width*/
+
+    msg.param[0] = 8;		// TYM DSP set for TDM
+    msg.param[1] = 48000;	// TYM DSP chg from 16k to 48k
+//    msg.param[1] = 16000;	// DMIC in 16k
+    msg.param[2] = 32;		// TYM DSP set for TDM
+    PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+
+    return kStatus_SHELL_Success;
+}
 // TYM DSP add <<
 
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg)
@@ -376,6 +413,7 @@ void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *ar
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(usb_mic));
     // TYM DSP add >>
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(flow));
+    SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(line));
     // TYM DSP add <<
     g_handleShellMessageCallback     = handleShellMessageCallback;
     g_handleShellMessageCallbackData = arg;

@@ -398,8 +398,8 @@ int DSP_ProcessThread(void *arg, int wake_value)
 //            DSP_PRINTF("dst : %d\r\n", temp);
 //            DSP_PRINTF("[TYM] read_size : %d, buffer_len: %d\r\n", read_size, buffer_len);
 
-    	    FlowEngine_ProcessInt16(engine, buffer, buffer);
-        	// TYM¡@DSP >>
+    	    FlowEngine_ProcessInt32(engine, buffer, buffer);
+        	// TYM DSP >>
 //            test_num++;
 //            int8_t tempB1 = 0;
 //            int8_t tempB2 = 0;

@@ -64,6 +64,9 @@ typedef struct _dsp_handle_t
     /* USB state management variables*/
     volatile bool usb_playing;
     volatile bool usb_recording;
+
+    /* TYM DSP add*/
+    volatile bool line_inout;
 } dsp_handle_t;
 
 /**
