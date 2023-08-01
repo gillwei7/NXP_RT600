@@ -47,4 +47,6 @@ void handleDSPMessage(app_handle_t *app, srtm_message *msg);
  * @param[in] arg Data to pass to callback handler.
  */
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg);
+
+void Send_Flow_Message(void);
 /*${prototype:end}*/

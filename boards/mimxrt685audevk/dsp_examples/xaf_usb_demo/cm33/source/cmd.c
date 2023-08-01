@@ -359,6 +359,20 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     }
     return kStatus_SHELL_Success;
 }
+char testFlowCmd[5] = "info/";
+
+void Send_Flow_Message(void)
+{
+	srtm_message msg = {0};
+    msg.head.type = SRTM_MessageTypeRequest;
+    msg.head.majorVersion = SRTM_VERSION_MAJOR;
+    msg.head.minorVersion = SRTM_VERSION_MINOR;
+    msg.head.category = SRTM_MessageCategory_FLOWCMD;
+    msg.head.command = SRTM_Command_FlowDSPSetParam;
+    msg.flow_msg = testFlowCmd;
+    handleShellMessage(&msg, NULL);
+    //g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+}
 // TYM DSP add <<
 
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg)

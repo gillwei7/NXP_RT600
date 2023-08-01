@@ -51,6 +51,7 @@
 #include "fsl_component_serial_manager.h"
 
 #include "fsl_shell.h"
+#include "srtm_config.h"
 
 /*
  * The OSA_USED macro can only be defined when the OSA component is used.
@@ -94,6 +95,11 @@ static OSA_MUTEX_HANDLE_DEFINE(s_shellMutex);
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "semphr.h"
+
+// TYM SW add >>
+#include "main_cm33.h"
+#include "cmd.h"
+// TYM SW add <<
 static QueueHandle_t s_shellMutex;
 
 #define SHELL_MUTEX_CREATE()   s_shellMutex = xSemaphoreCreateMutex()
@@ -171,6 +177,7 @@ typedef struct _shell_context_handle
 #define SHEEL_COMMAND_POINTER(node) \
     ((shell_command_t *)(((uint32_t)(node)) - (sizeof(shell_command_t) - sizeof(list_element_t))))
 #endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -216,6 +223,10 @@ static OSA_TASK_DEFINE(SHELL_Task, SHELL_TASK_PRIORITY, 1, SHELL_TASK_STACK_SIZE
 #endif
 #endif /* OSA_USED */
 #endif /* SHELL_NON_BLOCKING_MODE */
+
+static int8_t FlowCmdStep = FlowCmd_Step_Idle;
+static uint8_t flowCmdBuffer[64];
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -335,6 +346,99 @@ static void SHELL_hisOperation(uint8_t ch, shell_context_handle_t *shellContextH
             break;
     }
 }
+// TYM SW add >>
+#if CUSTOM_SHELL_TASK
+
+
+void Flow_Cmd_Read(uint8_t character)
+{
+	static uint16_t flowCmdLength;
+	static uint8_t  cmdCharCount;
+    switch(FlowCmdStep)
+    {
+        case FlowCmd_Step_Idle:
+            if(character == 0x01)
+            {
+                FlowCmdStep = FlowCmd_Step1_Header;
+                memset( flowCmdBuffer, 0, sizeof(flowCmdBuffer) );
+            }
+            break;
+
+        case FlowCmd_Step1_Header:
+            if(character == 0x00)
+            {
+               FlowCmdStep = FlowCmd_Step2_Length1;
+            }
+            break;
+
+        case FlowCmd_Step2_Length1:
+            flowCmdLength = 0;
+            flowCmdLength = flowCmdLength | ((uint16_t)character << 8);
+            FlowCmdStep = FlowCmd_Step3_Length2;
+            break;
+
+        case FlowCmd_Step3_Length2:
+            flowCmdLength += character;
+            cmdCharCount = 0;
+            FlowCmdStep = FlowCmd_Step4_Cmd;
+            break;
+
+        case FlowCmd_Step4_Cmd:
+            if( cmdCharCount < flowCmdLength )
+            {
+                flowCmdBuffer[cmdCharCount] = character;
+                cmdCharCount ++;
+                if (cmdCharCount == flowCmdLength )
+                {
+                    //TODO Send flow command to Hifi4
+                	Send_Flow_Message();
+                }
+            }
+            else
+            {
+                PRINTF("[Flow_Cmd_Read]ERROR");
+            }
+            break;
+    }
+}
+
+void SHELL_Task(shell_handle_t shellHandle)
+{
+    shell_context_handle_t *shellContextHandle = (shell_context_handle_t *)shellHandle;
+    shell_status_t shell_status;
+    uint8_t* ch;
+
+    if (NULL != shellContextHandle)
+    {
+        uint32_t osaCurrentSr = 0U;
+
+        osaCurrentSr                         = DisableGlobalIRQ();
+        shellContextHandle->notificationPost = 0U;
+        if (shellContextHandle->taskBusy > 0U)
+        {
+            EnableGlobalIRQ(osaCurrentSr);
+            return;
+        }
+        shellContextHandle->taskBusy = 1U;
+        EnableGlobalIRQ(osaCurrentSr);
+
+        {
+            shellContextHandle->notificationPost = 0U;
+            do
+            {
+                shell_status = (shell_status_t)SerialManager_ReadBlocking(shellContextHandle->serialReadHandle, ch, 1);
+                //Flow_Cmd_Read(*ch);
+                Send_Flow_Message();
+            } while ( *ch != '/' );
+        }
+
+        osaCurrentSr                 = DisableGlobalIRQ();
+        shellContextHandle->taskBusy = 0U;
+        EnableGlobalIRQ(osaCurrentSr);
+    }
+}
+#else // #if CUSTOM_SHELL_TASK
+
 #if (defined(SHELL_NON_BLOCKING_MODE) && (SHELL_NON_BLOCKING_MODE > 0U))
 static void SHELL_Task(void *param)
 #else
@@ -567,6 +671,8 @@ void SHELL_Task(shell_handle_t shellHandle)
         EnableGlobalIRQ(osaCurrentSr);
     }
 }
+#endif //#if CUSTOM_SHELL_TASK
+// TYM SW add <<
 
 static shell_status_t SHELL_HelpCommand(shell_handle_t shellHandle, int32_t argc, char **argv)
 {

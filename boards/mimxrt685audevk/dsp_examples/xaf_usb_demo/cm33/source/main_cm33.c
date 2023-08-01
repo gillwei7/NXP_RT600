@@ -54,6 +54,8 @@ ctimer_callback_t *cb_func_pll[] = {(ctimer_callback_t *)CTIMER_SOF_TOGGLE_HANDL
 static ctimer_config_t ctimerInfoPll;
 #endif
 static app_handle_t app;
+extern serial_handle_t g_serialHandle;
+static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_serialReadHandle);
 
 /*******************************************************************************
  * Code
