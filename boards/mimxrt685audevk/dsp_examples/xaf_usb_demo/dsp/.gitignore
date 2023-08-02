@@ -1,1 +1,3 @@
 xtensa/Makefile
+xtensa/Debug/
+xtensa/Release/
