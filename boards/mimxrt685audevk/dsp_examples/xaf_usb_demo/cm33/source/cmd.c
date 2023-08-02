@@ -96,7 +96,7 @@ SHELL_COMMAND_DEFINE(usb_mic,
                      shellUsbMic,
                      1);
 // TYM DSP add >>
-SHELL_COMMAND_DEFINE(flow, "\r\n\"flow\": Send command to control FlowDSP param\r\n", shellFlowDSP, 2);
+SHELL_COMMAND_DEFINE(flow, "\r\n\"flow\": Send command to control FlowDSP param\r\n", shellFlowDSP, 1);
 // TYM DSP add <<
 static bool usb_playing   = false;
 static bool usb_recording = false;
@@ -370,6 +370,7 @@ void Send_Flow_Message(void)
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
     msg.flow_msg = testFlowCmd;
+    msg.param[0] = 5;
     handleShellMessage(&msg, NULL);
     //g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }

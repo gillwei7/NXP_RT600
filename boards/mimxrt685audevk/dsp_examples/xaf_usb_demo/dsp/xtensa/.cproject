@@ -113,6 +113,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/dsp/nn/nnlib/inc"/>
                                     									
+                                    <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/boards/mimxrt685audevk/dsp_examples/xaf_usb_demo/dsp/xtensa/inc"/>
+                                    									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/multicore/rpmsg_lite/lib/common"/>
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/multicore/rpmsg_lite/lib/rpmsg_lite/porting/environment"/>
@@ -969,6 +971,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/dsp/nn/nnlib/inc"/>
                                     									
+                                    <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/boards/mimxrt685audevk/dsp_examples/xaf_usb_demo/dsp/xtensa/inc"/>
+                                    									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/multicore/rpmsg_lite/lib/common"/>
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/multicore/rpmsg_lite/lib/rpmsg_lite/porting/environment"/>
@@ -1824,6 +1828,8 @@
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/dsp/nn/nnlib"/>
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/dsp/nn/nnlib/inc"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/boards/mimxrt685audevk/dsp_examples/xaf_usb_demo/dsp/xtensa/inc"/>
                                     									
                                     <listOptionValue builtIn="false" value="D:/Git/Git_Flow_Platform/DSP_code/DSP_2/RT600_EVK/middleware/multicore/rpmsg_lite/lib/common"/>
                                     									

@@ -297,17 +297,19 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
 void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 {
-	char* valStr[4];
+	char charInput[64];
 
-	sprintf(valStr,"%d",value);
-	char dest[64] = "setCoord/";
-	char* postStr = "/0/0/";
-	strcat(dest,paramStr);
-	strcat(dest,valStr);
-	strcat(dest,postStr);
-	DSP_PRINTF("[FLOWDSP_SetParam] dest: %s\r\n", dest);
-	FlowEngine_query_cmd(engine,dest);
-	FlowDSP_SendCmdBack(dsp, &dest);
+//	sprintf(valStr,"%d",value);
+//	char dest[64] = "setCoord/";
+//	char* postStr = "/0/0/";
+//	strcat(dest,paramStr);
+//	strcat(dest,valStr);
+//	strcat(dest,postStr);
+	DSP_PRINTF("[FLOWDSP_SetParam] paramStr: %s\r\nparamValue:%d\r\n", paramStr, value);
+	memset( charInput, 0, sizeof(charInput) );
+	memcpy( charInput, paramStr, value);
+	char *flowCmdResult = FlowEngine_query_cmd(engine,charInput);
+	FlowDSP_SendCmdBack(dsp, flowCmdResult);
 }
 // TYM DSP add <<
 
