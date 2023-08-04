@@ -428,8 +428,15 @@ void SHELL_Task(shell_handle_t shellHandle)
             {
                 shell_status = (shell_status_t)SerialManager_ReadBlocking(shellContextHandle->serialReadHandle, ch, 1);
                 //Flow_Cmd_Read(*ch);
-                Send_Flow_Message();
-            } while ( *ch != '/' );
+                if(*ch == '1')
+                {
+                    Send_Flow_Message_1();
+                }
+                if(*ch == '/')
+                {
+                    Send_Flow_Message_2();
+                }
+            } while ( 1 );
         }
 
         osaCurrentSr                 = DisableGlobalIRQ();

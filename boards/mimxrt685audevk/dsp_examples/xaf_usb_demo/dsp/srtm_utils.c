@@ -298,7 +298,7 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 {
 	char charInput[64];
-
+	char flowPathInitStr[64] = "Flow_path_initialize done";
 //	sprintf(valStr,"%d",value);
 //	char dest[64] = "setCoord/";
 //	char* postStr = "/0/0/";
@@ -306,10 +306,20 @@ void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 //	strcat(dest,valStr);
 //	strcat(dest,postStr);
 	DSP_PRINTF("[FLOWDSP_SetParam] paramStr: %s\r\nparamValue:%d\r\n", paramStr, value);
-	memset( charInput, 0, sizeof(charInput) );
-	memcpy( charInput, paramStr, value);
-	char *flowCmdResult = FlowEngine_query_cmd(engine,charInput);
-	FlowDSP_SendCmdBack(dsp, flowCmdResult);
+	if(paramStr[0] == '1')
+	{
+		Flow_path_initialize();
+		FlowDSP_SendCmdBack(dsp, flowPathInitStr);
+	}
+	if(paramStr[0] == 'i')
+	{
+		memset( charInput, 0, sizeof(charInput) );
+		memcpy( charInput, paramStr, value);
+		char *flowCmdResult = FlowEngine_query_cmd(engine,charInput);
+		PRINTF("flowCmdResult:%s", flowCmdResult);
+		FlowDSP_SendCmdBack(dsp, flowCmdResult);
+	}
+
 }
 // TYM DSP add <<
 

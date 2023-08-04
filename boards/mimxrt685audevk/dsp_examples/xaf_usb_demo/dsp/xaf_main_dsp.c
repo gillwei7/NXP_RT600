@@ -307,8 +307,9 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
 static int handleMSG_FLOWCMD(dsp_handle_t *dsp, srtm_message *msg)
 {
 	DSP_PRINTF("\n[handleMSG_FLOWCMD]\r\n");
-//	DSP_PRINTF("msg string: %s\r\n", msg->flow_msg);
-//	DSP_PRINTF("msg param: %d\r\n", msg->param[0]);
+	DSP_PRINTF("msg string: %s\r\n", msg->flow_msg);
+	DSP_PRINTF("msg param: %d\r\n", msg->param[0]);
+
 	FLOWDSP_SetParam(dsp, msg->flow_msg, msg->param[0]);
 
 	return 0;

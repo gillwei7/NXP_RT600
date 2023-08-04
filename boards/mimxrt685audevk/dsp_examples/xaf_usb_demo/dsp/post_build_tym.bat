@@ -10,7 +10,7 @@ set build_target=!build_target:R=r!
 @echo %xt_build_project%
 @echo %xt_exe%
 
-xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_text_release.bin ^
+xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_text_%build_target%.bin ^
 --only-section=.Level3InterruptVector.literal ^
 --only-section=.DebugExceptionVector.literal ^
 --only-section=.NMIExceptionVector.literal ^
@@ -25,7 +25,7 @@ xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_text_
 --only-section=.UserExceptionVector.text ^
 --only-section=.DoubleExceptionVector.text
 
-xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_data_release.bin ^
+xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_data_%build_target%.bin ^
 --only-section=.clib.rodata   	 ^
 --only-section=.rtos.rodata   	 ^
 --only-section=.rodata        	 ^
@@ -35,5 +35,5 @@ xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_data_
 --only-section=.data             ^
 --only-section=.bss
 
-xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_ncache_release.bin ^
+xt-objcopy %xt_build_sysargs% -O binary %xt_exe% ../../cm33/dsp_binary/dsp_ncache_%build_target%.bin ^
 --only-section=NonCacheable

@@ -359,9 +359,10 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     }
     return kStatus_SHELL_Success;
 }
-char testFlowCmd[5] = "info/";
+char *testFlowCmd1 = "1";
+char *testFlowCmd2 = "info/";
 
-void Send_Flow_Message(void)
+void Send_Flow_Message_1(void)
 {
 	srtm_message msg = {0};
     msg.head.type = SRTM_MessageTypeRequest;
@@ -369,10 +370,23 @@ void Send_Flow_Message(void)
     msg.head.minorVersion = SRTM_VERSION_MINOR;
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = testFlowCmd;
+    msg.flow_msg = testFlowCmd1;
+    msg.param[0] = 1;
+//    handleShellMessage(&msg, NULL);
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+}
+void Send_Flow_Message_2(void)
+{
+    srtm_message msg = {0};
+    msg.head.type = SRTM_MessageTypeRequest;
+    msg.head.majorVersion = SRTM_VERSION_MAJOR;
+    msg.head.minorVersion = SRTM_VERSION_MINOR;
+    msg.head.category = SRTM_MessageCategory_FLOWCMD;
+    msg.head.command = SRTM_Command_FlowDSPSetParam;
+    msg.flow_msg = testFlowCmd2;
     msg.param[0] = 5;
-    handleShellMessage(&msg, NULL);
-    //g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+//    handleShellMessage(&msg, NULL);
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }
 // TYM DSP add <<
 
@@ -410,7 +424,7 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
 
     if (msg->head.type == SRTM_MessageTypeResponse)
     {
-        PRINTF("[APP_DSP_IPC_Task] response from DSP, cmd: %d, error: %d\r\n", msg->head.command, msg->error);
+        //PRINTF("[APP_DSP_IPC_Task] response from DSP, cmd: %d, error: %d\r\n", msg->head.command, msg->error);
     }
 
     /* Processing returned data*/
@@ -657,9 +671,21 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                 	}
                 	else
                 	{
-                		PRINTF("[DSP->MCU] DSP FlowDSP set parameter success!\r\n");
-                		PRINTF("[DSP->MCU] Set command: %s\r\n",msg->flow_msg);
+//                		PRINTF("[DSP->MCU] DSP FlowDSP set parameter success!\r\n");
+//                		PRINTF("[DSP->MCU] Set command: %s\r\n",msg->flow_msg);
+                	    USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+
+                	    uint8_t dest[64];
+                	    memset(dest, 0, sizeof(dest));
+                	    dest[0] = 1;
+                	    dest[1] = 0;
+                	    dest[2] = 0;
+                	    dest[3] = 21;
+
+                	    memcpy( &dest[4], msg->flow_msg, 21 );
+                	    USART_WriteBlocking(s_UsartAdapterBase[0], dest, 25);
                 	}
+                	*notify_shell = true;
                 	break;
                 }
                 // TYM DSP add <<
