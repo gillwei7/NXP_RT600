@@ -1,22 +1,22 @@
 rpmsg_platform.o: \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\rpmsg_lite\porting\platform\imxrt600_hifi4\rpmsg_platform.c \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\include\platform\imxrt600_hifi4\rpmsg_platform.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_env.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_default_config.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\rpmsg_config.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\include\environment\xos\rpmsg_env_specific.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_default_config.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\utilities\debug_console\fsl_debug_console.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_common.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\fsl_device_registers.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\MIMXRT685S_dsp.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\system_MIMXRT685S_dsp.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\MIMXRT685S_dsp_features.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_common_dsp.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_clock.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_reset.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_common.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\components\serial_manager\fsl_component_serial_manager.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\components\serial_manager\fsl_component_serial_port_uart.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\components\uart\fsl_adapter_uart.h \
-  D:\Git\Git_Flow_Platform\DSP_code\DSP_2\RT600_EVK\devices\MIMXRT685S\drivers\fsl_mu.h
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\rpmsg_lite\porting\platform\imxrt600_hifi4\rpmsg_platform.c \
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\include\platform\imxrt600_hifi4\rpmsg_platform.h \
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_env.h \
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_default_config.h \
+  D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\rpmsg_config.h \
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\include\environment\xos\rpmsg_env_specific.h \
+  D:\RT600\SDK\middleware\multicore\rpmsg_lite\lib\include\rpmsg_default_config.h \
+  D:\RT600\SDK\devices\MIMXRT685S\utilities\debug_console\fsl_debug_console.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_common.h \
+  D:\RT600\SDK\devices\MIMXRT685S\fsl_device_registers.h \
+  D:\RT600\SDK\devices\MIMXRT685S\MIMXRT685S_dsp.h \
+  D:\RT600\SDK\devices\MIMXRT685S\system_MIMXRT685S_dsp.h \
+  D:\RT600\SDK\devices\MIMXRT685S\MIMXRT685S_dsp_features.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_common_dsp.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_clock.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_reset.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_common.h \
+  D:\RT600\SDK\components\serial_manager\fsl_component_serial_manager.h \
+  D:\RT600\SDK\components\serial_manager\fsl_component_serial_port_uart.h \
+  D:\RT600\SDK\components\uart\fsl_adapter_uart.h \
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_mu.h

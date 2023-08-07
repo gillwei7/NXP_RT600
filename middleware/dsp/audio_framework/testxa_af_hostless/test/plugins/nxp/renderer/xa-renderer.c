@@ -47,6 +47,8 @@
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
 
+#include "FlowEngine.h"
+
 /*******************************************************************************
  * Tracing configuration
  ******************************************************************************/
@@ -74,6 +76,7 @@
 /* Maxmimum configurable frame size, based on DMA limits */
 #define MAX_FRAME_SIZE (MAX_DMA_TRANSFER_SIZE * MAX_DMA_TRANSFER_PER_FRAME)
 
+extern FlowEngine*	engine;
 
 typedef struct XARenderer
 {
@@ -406,6 +409,11 @@ static void evk_hw_renderer_init(void* ptr)
     bool mono, enable_int;
     uint8_t channelNum = d->codec_channels == 1 ? 2 : d->codec_channels;
     uint8_t dmaWidth = d->pcm_width * d->codec_channels > 16 ? 4 : 2;
+
+#if 1
+
+#endif
+
 
     I2S_TxGetDefaultConfig(&s_TxConfig);
 #if 1
@@ -1090,12 +1098,76 @@ static XA_ERRORCODE xa_renderer_get_config_param(XARenderer *d, WORD32 i_idx, pV
 
 static XA_ERRORCODE xa_renderer_do_exec(XARenderer *d)
 {
+
+#if 1
+    WORD32     i, nSize;
+    WORD32    *pIn = (WORD32 *) d->input;
+    WORD32    *pOut = (WORD32 *) d->output;
+    UWORD32     filled;
+    WORD32     input;
+    WORD64     product;
+    if(engine != NULL)
+    	FlowEngine_ProcessInt32(engine,d->input, d->input);
+
+#endif
+
     d->consumed = xa_hw_renderer_submit(d, d->input, d->submited_inbytes);
 
     d->cumulative_bytes_produced += d->consumed;
 
     return XA_NO_ERROR;
 }
+
+
+/* ...apply gain to 32-bit PCM stream */
+//static XA_ERRORCODE xa_pcm_gain_do_execute_32bit(XAPcmGain *d)
+//{
+//    WORD32     i, nSize;
+//    WORD32    *pIn = (WORD32 *) d->input;
+//    WORD32    *pOut = (WORD32 *) d->output;
+//    UWORD32     filled;
+//    WORD32     input;
+//    WORD16     gain = pcm_gains[d->gain_idx];
+//    WORD64     product;
+//
+//    filled = (d->input_avail > d->buffer_size)?d->buffer_size:d->input_avail;
+//    nSize = filled >> 2;    //size of each sample is 4 bytes
+//
+//    /* ...check I/O buffer */
+//    XF_CHK_ERR(d->input, XA_PCM_GAIN_EXEC_FATAL_INPUT);
+//    XF_CHK_ERR(d->output, XA_PCM_GAIN_EXEC_FATAL_INPUT);
+//
+//    /* ...Processing loop */
+//    for (i = 0; i < nSize; i++)
+//    {
+//        input = *pIn++;
+//        product = (WORD64)input*gain;
+//        product = product >> 12;
+//
+//        if(product > MAX_32BIT)
+//            product = MAX_32BIT;
+//        else if(product < MIN_32BIT)
+//            product = MIN_32BIT;
+//
+//        *pOut++ = (WORD32)product;
+//    }
+//
+//    /* ...save total number of consumed bytes */
+//    //d->consumed = (UWORD32)((void *)pIn - d->input);
+//    d->consumed = filled;
+//
+//    /* ...save total number of produced bytes */
+//    d->produced = (UWORD32)((void *)pOut - d->output);
+//
+//    /* ...put flag saying we have output buffer */
+//    d->state |= XA_PCM_GAIN_FLAG_OUTPUT;
+//
+//    TRACE(PROCESS, _b("produced: %u bytes (%u samples)"), d->produced, nSize);
+//
+//    /* ...return success result code */
+//    return XA_NO_ERROR;
+//}
+
 
 /* ...execution command */
 static XA_ERRORCODE xa_renderer_execute(XARenderer *d, WORD32 i_idx, pVOID pv_value)
