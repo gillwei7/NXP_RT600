@@ -96,10 +96,10 @@ static OSA_MUTEX_HANDLE_DEFINE(s_shellMutex);
 #include "queue.h"
 #include "semphr.h"
 
-// TYM SW add >>
+// TYM FW add >>
 #include "main_cm33.h"
 #include "cmd.h"
-// TYM SW add <<
+// TYM FW add <<
 static QueueHandle_t s_shellMutex;
 
 #define SHELL_MUTEX_CREATE()   s_shellMutex = xSemaphoreCreateMutex()
@@ -224,7 +224,7 @@ static OSA_TASK_DEFINE(SHELL_Task, SHELL_TASK_PRIORITY, 1, SHELL_TASK_STACK_SIZE
 #endif /* OSA_USED */
 #endif /* SHELL_NON_BLOCKING_MODE */
 
-static int8_t FlowCmdStep = FlowCmd_Step_Idle;
+int8_t FlowCmdStep = FlowCmd_Step0_PreFlowPathInit;
 static uint8_t flowCmdBuffer[64];
 
 /*******************************************************************************
@@ -346,7 +346,7 @@ static void SHELL_hisOperation(uint8_t ch, shell_context_handle_t *shellContextH
             break;
     }
 }
-// TYM SW add >>
+// TYM FW add >>
 #if CUSTOM_SHELL_TASK
 
 
@@ -356,47 +356,59 @@ void Flow_Cmd_Read(uint8_t character)
 	static uint8_t  cmdCharCount;
     switch(FlowCmdStep)
     {
-        case FlowCmd_Step_Idle:
+        case FlowCmd_Step0_PreFlowPathInit:
+            if(character == '1')
+            {
+                send_FlowPathInit_Cmd(character);
+            }
+            break;
+
+        case FlowCmd_Step1_Header1:
             if(character == 0x01)
             {
-                FlowCmdStep = FlowCmd_Step1_Header;
+                FlowCmdStep = FlowCmd_Step2_Header2;
                 memset( flowCmdBuffer, 0, sizeof(flowCmdBuffer) );
             }
             break;
 
-        case FlowCmd_Step1_Header:
+        case FlowCmd_Step2_Header2:
             if(character == 0x00)
             {
-               FlowCmdStep = FlowCmd_Step2_Length1;
+               FlowCmdStep = FlowCmd_Step3_Length1;
             }
             break;
 
-        case FlowCmd_Step2_Length1:
+        case FlowCmd_Step3_Length1:
             flowCmdLength = 0;
             flowCmdLength = flowCmdLength | ((uint16_t)character << 8);
-            FlowCmdStep = FlowCmd_Step3_Length2;
+            FlowCmdStep = FlowCmd_Step4_Length2;
             break;
 
-        case FlowCmd_Step3_Length2:
+        case FlowCmd_Step4_Length2:
             flowCmdLength += character;
             cmdCharCount = 0;
-            FlowCmdStep = FlowCmd_Step4_Cmd;
+            FlowCmdStep = FlowCmd_Step5_Cmd;
             break;
 
-        case FlowCmd_Step4_Cmd:
+        case FlowCmd_Step5_Cmd:
             if( cmdCharCount < flowCmdLength )
             {
                 flowCmdBuffer[cmdCharCount] = character;
                 cmdCharCount ++;
                 if (cmdCharCount == flowCmdLength )
                 {
-                    //TODO Send flow command to Hifi4
-                	Send_Flow_Message();
+                    send_FlowStudio_Cmd( flowCmdBuffer, flowCmdLength);
+                    cmdCharCount = 0;
+                    memset( flowCmdBuffer, 0, sizeof(flowCmdBuffer) );
+                    FlowCmdStep = FlowCmd_Step1_Header1;
                 }
             }
             else
             {
                 PRINTF("[Flow_Cmd_Read]ERROR");
+                cmdCharCount = 0;
+                memset( flowCmdBuffer, 0, sizeof(flowCmdBuffer) );
+                FlowCmdStep = FlowCmd_Step1_Header1;
             }
             break;
     }
@@ -427,15 +439,7 @@ void SHELL_Task(shell_handle_t shellHandle)
             do
             {
                 shell_status = (shell_status_t)SerialManager_ReadBlocking(shellContextHandle->serialReadHandle, ch, 1);
-                //Flow_Cmd_Read(*ch);
-                if(*ch == '1')
-                {
-                    Send_Flow_Message_1();
-                }
-                if(*ch == '/')
-                {
-                    Send_Flow_Message_2();
-                }
+                Flow_Cmd_Read(*ch);
             } while ( 1 );
         }
 
@@ -679,7 +683,7 @@ void SHELL_Task(shell_handle_t shellHandle)
     }
 }
 #endif //#if CUSTOM_SHELL_TASK
-// TYM SW add <<
+// TYM FW add <<
 
 static shell_status_t SHELL_HelpCommand(shell_handle_t shellHandle, int32_t argc, char **argv)
 {

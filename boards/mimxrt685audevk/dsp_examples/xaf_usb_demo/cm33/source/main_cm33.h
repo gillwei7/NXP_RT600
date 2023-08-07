@@ -27,11 +27,12 @@ typedef struct _app_handle
 
 enum
 {
-    FlowCmd_Step_Idle = 0,
-	FlowCmd_Step1_Header,
-	FlowCmd_Step2_Length1,
-	FlowCmd_Step3_Length2,
-	FlowCmd_Step4_Cmd
+    FlowCmd_Step0_PreFlowPathInit = 0,
+    FlowCmd_Step1_Header1,
+	FlowCmd_Step2_Header2,
+	FlowCmd_Step3_Length1,
+	FlowCmd_Step4_Length2,
+	FlowCmd_Step5_Cmd
 };
 
 #endif /* __MAIN_CM33_H__ */

@@ -107,6 +107,9 @@ static shell_handle_t s_shellHandle;
 extern serial_handle_t g_serialHandle;
 static handleShellMessageCallback_t *g_handleShellMessageCallback;
 static void *g_handleShellMessageCallbackData;
+// TYM FW add >>
+extern int8_t FlowCmdStep;
+// TYM FW add <<
 /*${variable:end}*/
 
 /*******************************************************************************
@@ -359,10 +362,8 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     }
     return kStatus_SHELL_Success;
 }
-char *testFlowCmd1 = "1";
-char *testFlowCmd2 = "info/";
 
-void Send_Flow_Message_1(void)
+void send_FlowPathInit_Cmd(char flowPathInitChar)
 {
 	srtm_message msg = {0};
     msg.head.type = SRTM_MessageTypeRequest;
@@ -370,12 +371,12 @@ void Send_Flow_Message_1(void)
     msg.head.minorVersion = SRTM_VERSION_MINOR;
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = testFlowCmd1;
+    msg.flow_msg = &flowPathInitChar;
     msg.param[0] = 1;
-//    handleShellMessage(&msg, NULL);
+
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }
-void Send_Flow_Message_2(void)
+void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
 {
     srtm_message msg = {0};
     msg.head.type = SRTM_MessageTypeRequest;
@@ -383,9 +384,9 @@ void Send_Flow_Message_2(void)
     msg.head.minorVersion = SRTM_VERSION_MINOR;
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = testFlowCmd2;
-    msg.param[0] = 5;
-//    handleShellMessage(&msg, NULL);
+    msg.flow_msg = flowCmdCharPtr;
+    msg.param[0] = cmdLength;
+
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }
 // TYM DSP add <<
@@ -671,19 +672,33 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                 	}
                 	else
                 	{
-//                		PRINTF("[DSP->MCU] DSP FlowDSP set parameter success!\r\n");
-//                		PRINTF("[DSP->MCU] Set command: %s\r\n",msg->flow_msg);
-                	    USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+                        if( FlowCmdStep == FlowCmd_Step0_PreFlowPathInit)
+                        {
+                            if( msg->flow_msg[0] == 'S' && msg->flow_msg[1] == 'u' && msg->flow_msg[2] == 'c')
+                            {
+                                PRINTF( msg->flow_msg, "%s");
+                                FlowCmdStep = FlowCmd_Step1_Header1;
+                            }
+                            else
+                            {
+                                // Encounter some error
+                                PRINTF( "Error on Flow Path initialize\r\n");
+                            }
+                        }
+                        else
+                        {
+                            USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+                            uint8_t dest[64];
+                            memset(dest, 0, sizeof(dest));
+                            dest[0] = 1;
+                            dest[1] = 0;
+                            dest[2] = 0;
+                            dest[3] = msg->param[0];
 
-                	    uint8_t dest[64];
-                	    memset(dest, 0, sizeof(dest));
-                	    dest[0] = 1;
-                	    dest[1] = 0;
-                	    dest[2] = 0;
-                	    dest[3] = 21;
-
-                	    memcpy( &dest[4], msg->flow_msg, 21 );
-                	    USART_WriteBlocking(s_UsartAdapterBase[0], dest, 25);
+                            memcpy( &dest[4], msg->flow_msg, msg->param[0] );
+                            // TODO modify to serial manager write
+                            USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
+                        }
                 	}
                 	*notify_shell = true;
                 	break;

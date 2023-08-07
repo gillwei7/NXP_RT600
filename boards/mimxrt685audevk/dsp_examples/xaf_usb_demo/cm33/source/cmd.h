@@ -47,6 +47,8 @@ void handleDSPMessage(app_handle_t *app, srtm_message *msg);
  * @param[in] arg Data to pass to callback handler.
  */
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg);
-
-void Send_Flow_Message(void);
+// TYM FW add >>
+void send_FlowPathInit_Cmd(char flowPathInitChar);
+void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength);
+// TYM FW add <<
 /*${prototype:end}*/
