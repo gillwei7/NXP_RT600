@@ -16,6 +16,4 @@ xa-renderer.o: \
   D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_clock.h \
   D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_reset.h \
   D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_i2s.h \
-  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_flexcomm.h \
-  D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\FlowEngine.h \
-  D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\DllExport.h
+  D:\RT600\SDK\devices\MIMXRT685S\drivers\fsl_flexcomm.h

@@ -47,8 +47,6 @@
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
 
-#include "FlowEngine.h"
-
 /*******************************************************************************
  * Tracing configuration
  ******************************************************************************/
@@ -75,8 +73,6 @@
 #define MAX_DMA_TRANSFER_PER_FRAME 3
 /* Maxmimum configurable frame size, based on DMA limits */
 #define MAX_FRAME_SIZE (MAX_DMA_TRANSFER_SIZE * MAX_DMA_TRANSFER_PER_FRAME)
-
-extern FlowEngine*	engine;
 
 typedef struct XARenderer
 {
@@ -1098,19 +1094,6 @@ static XA_ERRORCODE xa_renderer_get_config_param(XARenderer *d, WORD32 i_idx, pV
 
 static XA_ERRORCODE xa_renderer_do_exec(XARenderer *d)
 {
-
-#if 1
-    WORD32     i, nSize;
-    WORD32    *pIn = (WORD32 *) d->input;
-    WORD32    *pOut = (WORD32 *) d->output;
-    UWORD32     filled;
-    WORD32     input;
-    WORD64     product;
-    if(engine != NULL)
-    	FlowEngine_ProcessInt32(engine,d->input, d->input);
-
-#endif
-
     d->consumed = xa_hw_renderer_submit(d, d->input, d->submited_inbytes);
 
     d->cumulative_bytes_produced += d->consumed;

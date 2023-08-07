@@ -12,4 +12,6 @@ xa-pcm-gain.o: \
   D:\RT600\SDK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_error_standards.h \
   D:\RT600\SDK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_apicmd_standards.h \
   D:\RT600\SDK\middleware\dsp\audio_framework\libxa_af_hostless\include\audio\xa_memory_standards.h \
-  D:\RT600\SDK\middleware\dsp\audio_framework\testxa_af_hostless\test\plugins\xa-gain-factor-event.h
+  D:\RT600\SDK\middleware\dsp\audio_framework\testxa_af_hostless\test\plugins\xa-gain-factor-event.h \
+  D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\FlowEngine.h \
+  D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\DllExport.h

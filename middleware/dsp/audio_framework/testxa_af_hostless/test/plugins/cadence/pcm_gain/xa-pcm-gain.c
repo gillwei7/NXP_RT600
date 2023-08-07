@@ -44,6 +44,9 @@
 #include "xa-gain-factor-event.h"
 #endif
 
+#include "FlowEngine.h"
+
+extern FlowEngine* engine;
 #ifdef XAF_PROFILE
 #include "xaf-clk-test.h"
 extern clk_t pcm_gain_cycles;
@@ -150,6 +153,7 @@ WORD16 pcm_gains[7]    = {4096, 2053, 1029, 516, 8173, 16306, 32536};    // Q12 
  * DSP functions
  ******************************************************************************/
 
+
 /* ...pcm gain component pre-initialization (default parameters) */
 static inline void xa_pcm_gain_preinit(XAPcmGain *d)
 {
@@ -163,6 +167,7 @@ static inline void xa_pcm_gain_preinit(XAPcmGain *d)
     d->sample_rate = 48000;
     d->burn_cycles = 0;
     d->frame_size = 480; /* ...10ms frame size at 48 kHz */
+
 
 #ifdef XA_INPORT_BYPASS_TEST
     /* ...enabled at init for testing. To be enabled by set-config to the plugin. */
@@ -338,26 +343,31 @@ static XA_ERRORCODE xa_pcm_gain_do_execute_32bit(XAPcmGain *d)
     XF_CHK_ERR(d->output, XA_PCM_GAIN_EXEC_FATAL_INPUT);
     
     /* ...Processing loop */
+#if 0
     for (i = 0; i < nSize; i++)
-    {    
+    {
         input = *pIn++;
         product = (WORD64)input*gain;
         product = product >> 12;
-        
+
         if(product > MAX_32BIT)
             product = MAX_32BIT;
         else if(product < MIN_32BIT)
             product = MIN_32BIT;
-        
+
         *pOut++ = (WORD32)product;
     }
 
+#else
+    if(engine != NULL)
+    	FlowEngine_ProcessInt32(engine,d->input, d->output);
+#endif
     /* ...save total number of consumed bytes */
     //d->consumed = (UWORD32)((void *)pIn - d->input);
     d->consumed = filled;
 
     /* ...save total number of produced bytes */
-    d->produced = (UWORD32)((void *)pOut - d->output);
+    d->produced = 1024;//(UWORD32)((void *)pOut - d->output);
 
     /* ...put flag saying we have output buffer */
     d->state |= XA_PCM_GAIN_FLAG_OUTPUT;

@@ -26,6 +26,7 @@
 #include "dsp_config.h"
 #include "srtm_utils.h"
 #include "srtm_config_audio.h"
+
 #include "FlowEngine.h"
 
 /*******************************************************************************
@@ -247,11 +248,12 @@ static int renderer_start_operation(void *p_comp)
     return xaf_comp_set_config(p_comp, 1, &param[0]);
 }
 
+
+// TYM DSP add >>
 #define BUF_SIZE 100*1024
 static uint8_t MEMPOOL_BUF[BUF_SIZE];
-
 static uint8_t FlowExecOnce = 0;
-extern FlowEngine*	engine;
+FlowEngine*	engine = NULL;
 
 /*******************************************************************************
  * Commands processing
@@ -281,56 +283,6 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
     width         = pCmdParams[2];
 
     comp_clean(dsp);
-
-    if (FlowExecOnce == 0)
-        {
-        FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
-        engine = FlowEngine_create("engine", NULL, 8, 8);
-        FlowEngine_prepare(engine, 48000, 32);
-
-        FlowEngine_query_cmd(engine, "setRoot/lockAudio/1/");
-        FlowEngine_query_cmd(engine, "clearLayout/");
-        FlowEngine_query_cmd(engine, "init/17/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_1/0/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_2/1/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_3/2/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_4/3/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_5/4/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_6/5/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_7/6/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/IN/IN_8/7/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_1/9/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_2/10/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_3/11/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_4/12/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_5/13/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_6/14/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_7/15/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/OUT/OUT_8/16/-1/-1/-1/0/");
-        FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/8/8/8/1/0/");
-        FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/0.0/0/0/");
-        FlowEngine_query_cmd(engine, "reprepare/");
-        FlowEngine_query_cmd(engine, "buildProcStep/");
-        FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
-        FlowEngine_query_cmd(engine, "wire/IN_2@0/GAIN_1@1/");
-        FlowEngine_query_cmd(engine, "wire/IN_3@0/GAIN_1@2/");
-        FlowEngine_query_cmd(engine, "wire/IN_4@0/GAIN_1@3/");
-        FlowEngine_query_cmd(engine, "wire/IN_5@0/GAIN_1@4/");
-        FlowEngine_query_cmd(engine, "wire/IN_6@0/GAIN_1@5/");
-        FlowEngine_query_cmd(engine, "wire/IN_7@0/GAIN_1@6/");
-        FlowEngine_query_cmd(engine, "wire/IN_8@0/GAIN_1@7/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@0/OUT_1@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@1/OUT_2@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@2/OUT_3@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@3/OUT_4@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@4/OUT_5@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@5/OUT_6@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@6/OUT_7@0/");
-        FlowEngine_query_cmd(engine, "wire/GAIN_1@7/OUT_8@0/");
-        FlowEngine_query_cmd(engine, "setRoot/lockAudio/0/");
-        FlowExecOnce++;
-        }
-
 
     /* Component data preparation */
     for (i = 0; i < NUM_COMP_IN_GRAPH; i++)
@@ -385,6 +337,54 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
                 return -1;
         }
     }
+    if (FlowExecOnce == 0)
+	{
+		FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
+		engine = FlowEngine_create("engine", NULL, 8, 8);
+		FlowEngine_prepare(engine, 48000, 32);
+
+		FlowEngine_query_cmd(engine, "setRoot/lockAudio/1/");
+		FlowEngine_query_cmd(engine, "clearLayout/");
+		FlowEngine_query_cmd(engine, "init/17/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_1/0/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_2/1/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_3/2/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_4/3/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_5/4/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_6/5/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_7/6/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/IN/IN_8/7/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_1/9/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_2/10/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_3/11/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_4/12/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_5/13/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_6/14/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_7/15/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/OUT/OUT_8/16/-1/-1/-1/0/");
+		FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/8/8/8/1/0/");
+		FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/12.0/0/0/");
+		FlowEngine_query_cmd(engine, "reprepare/");
+		FlowEngine_query_cmd(engine, "buildProcStep/");
+		FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
+		FlowEngine_query_cmd(engine, "wire/IN_2@0/GAIN_1@1/");
+		FlowEngine_query_cmd(engine, "wire/IN_3@0/GAIN_1@2/");
+		FlowEngine_query_cmd(engine, "wire/IN_4@0/GAIN_1@3/");
+		FlowEngine_query_cmd(engine, "wire/IN_5@0/GAIN_1@4/");
+		FlowEngine_query_cmd(engine, "wire/IN_6@0/GAIN_1@5/");
+		FlowEngine_query_cmd(engine, "wire/IN_7@0/GAIN_1@6/");
+		FlowEngine_query_cmd(engine, "wire/IN_8@0/GAIN_1@7/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@0/OUT_1@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@1/OUT_2@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@2/OUT_3@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@3/OUT_4@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@4/OUT_5@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@5/OUT_6@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@6/OUT_7@0/");
+		FlowEngine_query_cmd(engine, "wire/GAIN_1@7/OUT_8@0/");
+		FlowEngine_query_cmd(engine, "setRoot/lockAudio/0/");
+		FlowExecOnce++;
+	}
 
     /* Initialize XAF */
     xaf_adev_config_default_init(&device_config);
