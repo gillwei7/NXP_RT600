@@ -523,24 +523,24 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
     		LineInOut_cleanup_stack, STACK_SIZE, 7, 0, 0);
 #else
     DSP_PRINTF("[TYM][DSP] Start capturer->pcm/gain->renderer\r\n");
-    while (1)
-    {
-        /* Sleep 100 msec */
-        xos_thread_sleep_msec(100);
-
-        /* Check renderer for errors */
-        cid            = XA_RENDERER_0;
-        param[0]       = XA_RENDERER_CONFIG_PARAM_STATE;
-        param[2]       = XA_RENDERER_CONFIG_PARAM_BYTES_PRODUCED;
-        ret            = xaf_comp_get_config(comp_get_pointer(dsp, cid, false), 2, &param[0]);
-        renderer_state = param[1];
-
-        if (ret != XAF_NO_ERR)
-        {
-            DSP_PRINTF("renderer get_config error:%x\n", ret);
-            return -1;
-        }
-    }
+//    while (1)
+//    {
+//        /* Sleep 100 msec */
+//        xos_thread_sleep_msec(100);
+//
+//        /* Check renderer for errors */
+//        cid            = XA_RENDERER_0;
+//        param[0]       = XA_RENDERER_CONFIG_PARAM_STATE;
+//        param[2]       = XA_RENDERER_CONFIG_PARAM_BYTES_PRODUCED;
+//        ret            = xaf_comp_get_config(comp_get_pointer(dsp, cid, false), 2, &param[0]);
+//        renderer_state = param[1];
+//
+//        if (ret != XAF_NO_ERR)
+//        {
+//            DSP_PRINTF("renderer get_config error:%x\n", ret);
+//            return -1;
+//        }
+//    }
 #endif
 
     return 0;
