@@ -41,6 +41,9 @@ static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, c
 #if XA_CLIENT_PROXY
 static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, char **argv);
 #endif
+// TYM DSP add >>
+static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+// TYM DSP add <<
 
 /*${prototype:end}*/
 
@@ -404,6 +407,26 @@ static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, c
 // TYM DSP add <<
 void send_FlowPathInit_Cmd(char flowPathInitChar)
 {
+#if 1
+    srtm_message msg = {0};
+
+    initMessage(&msg);
+
+    msg.head.category = SRTM_MessageCategory_AUDIO;
+    msg.head.command = SRTM_Command_LINEINOUT;
+
+    /* Param 0 Number of Channels*/
+    /* Param 1 Sampling Rate*/
+    /* Param 2 PCM bit Width*/
+
+    msg.param[0] = 8;       // TYM DSP set for TDM
+    msg.param[1] = 48000;   // TYM DSP chg from 16k to 48k
+//    msg.param[1] = 16000; // DMIC in 16k
+    msg.param[2] = 32;      // TYM DSP set for TDM
+    PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+#else
 	srtm_message msg = {0};
     msg.head.type = SRTM_MessageTypeRequest;
     msg.head.majorVersion = SRTM_VERSION_MAJOR;
@@ -414,6 +437,7 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
     msg.param[0] = 1;
 
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+#endif
 }
 void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
 {

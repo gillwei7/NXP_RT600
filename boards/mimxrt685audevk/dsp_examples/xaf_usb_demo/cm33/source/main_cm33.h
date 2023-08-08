@@ -15,7 +15,7 @@
 #include "rpmsg_ns.h"
 #include "rpmsg_queue.h"
 
-#define CUSTOM_SHELL_TASK 0
+#define CUSTOM_SHELL_TASK 1
 /*******************************************************************************
  * Definitions
  ******************************************************************************/

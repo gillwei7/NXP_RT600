@@ -541,6 +541,9 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
 //            return -1;
 //        }
 //    }
+
+    char flowCmdResult[64] = "Success, Flow_path_initialize done";
+    FlowDSP_SendCmdBack(dsp, flowCmdResult);
 #endif
 
     return 0;
