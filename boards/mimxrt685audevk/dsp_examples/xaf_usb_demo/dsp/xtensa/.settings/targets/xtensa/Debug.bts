@@ -50,6 +50,10 @@
                             <ListEntry>${xt_project_loc}/../../../../../../middleware/EAP/EAP_Includes</ListEntry>
                             <ListEntry>${xt_project_loc}/../../../../../../devices/MIMXRT685S</ListEntry>
                             <ListEntry>${xt_project_loc}/../../../../../../CMSIS/Core/Include</ListEntry>
+<<<<<<< HEAD
+=======
+                            <ListEntry>${xt_project_loc}/inc</ListEntry>
+>>>>>>> gill/test/Flow_Cmd_UART
                         </value>
                     </StringListMapEntry>
                 </StringListMapOptions>
@@ -149,7 +153,11 @@
                     <StringListMapEntry>
                         <key>LibrarySearchPath</key>
                         <value flag="-L" inheritance="prepend">
+<<<<<<< HEAD
                             <ListEntry>D:\RT600\SDK\boards\mimxrt685audevk\dsp_examples\xaf_usb_demo\dsp\xtensa\inc</ListEntry>
+=======
+                            <ListEntry>${xt_project_loc}/inc</ListEntry>
+>>>>>>> gill/test/Flow_Cmd_UART
                         </value>
                     </StringListMapEntry>
                     <StringListMapEntry>

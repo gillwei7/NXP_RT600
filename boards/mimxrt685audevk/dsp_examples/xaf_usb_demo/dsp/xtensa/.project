@@ -398,6 +398,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>rpmsg_lite/env</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>rpmsg_lite/include</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -588,9 +593,19 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>rpmsg_lite/include/environment</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>rpmsg_lite/include/llist.h</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/multicore/rpmsg_lite/lib/include/llist.h</locationURI>
+		</link>
+		<link>
+			<name>rpmsg_lite/include/platform</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>rpmsg_lite/include/rpmsg_compiler.h</name>
@@ -626,6 +641,11 @@
 			<name>rpmsg_lite/include/virtqueue.h</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/multicore/rpmsg_lite/lib/include/virtqueue.h</locationURI>
+		</link>
+		<link>
+			<name>rpmsg_lite/rpmsg_lite/porting</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>rpmsg_lite/rpmsg_lite/rpmsg_lite.c</name>
@@ -733,7 +753,17 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>rpmsg_lite/rpmsg_lite/porting/platform</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>dsp/audio_framework/libxa_af_hostless/include/audio</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>dsp/audio_framework/libxa_af_hostless/include/sysdeps</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -843,6 +873,11 @@
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/dsp/audio_framework/libxa_af_hostless/include/audio/xa_type_def.h</locationURI>
 		</link>
 		<link>
+			<name>dsp/audio_framework/libxa_af_hostless/include/sysdeps/xos</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>dsp/audio_framework/testxa_af_hostless/test/include/audio</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -883,6 +918,16 @@
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/dsp/audio_framework/testxa_af_hostless/test/include/xaf-utils-test.h</locationURI>
 		</link>
 		<link>
+			<name>dsp/audio_framework/testxa_af_hostless/test/plugins/cadence</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>dsp/audio_framework/testxa_af_hostless/test/plugins/nxp</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>dsp/audio_framework/testxa_af_hostless/test/plugins/xa-factory.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/dsp/audio_framework/testxa_af_hostless/test/plugins/xa-factory.c</locationURI>
@@ -904,6 +949,11 @@
 		</link>
 		<link>
 			<name>dsp/audio_framework/libxa_af_hostless/algo/hifi-dpf/include/lib</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>dsp/audio_framework/libxa_af_hostless/algo/hifi-dpf/include/sys</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1071,6 +1121,11 @@
 			<name>dsp/audio_framework/libxa_af_hostless/algo/hifi-dpf/src/xf-sched.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/middleware/dsp/audio_framework/libxa_af_hostless/algo/hifi-dpf/src/xf-sched.c</locationURI>
+		</link>
+		<link>
+			<name>dsp/audio_framework/libxa_af_hostless/algo/host-apf/include/sys</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>dsp/audio_framework/libxa_af_hostless/algo/host-apf/include/xaf-structs.h</name>

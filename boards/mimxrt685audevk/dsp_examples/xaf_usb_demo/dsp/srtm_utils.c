@@ -302,6 +302,7 @@ void DSP_SendUsbError(dsp_handle_t *dsp, usb_device_type_t usb_dev)
 void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 {
     srtm_message msg = {0};
+    uint32_t dstMsgStrLength = strlen(dstMsg);
 
     msg.head.type         = SRTM_MessageTypeRequest;
     msg.head.majorVersion = SRTM_VERSION_MAJOR;
@@ -309,7 +310,9 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
     msg.head.category = SRTM_MessageCategory_AUDIO;
     msg.head.command  = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = dstMsg;
+    memcpy(msg.flow_msg, dstMsg, dstMsgStrLength);
+    msg.param[0] = dstMsgStrLength;
+    DSP_PRINTF("%s\r\nReturn string length:%d",dstMsg, dstMsgStrLength);
     xos_mutex_lock(&dsp->rpmsgMutex);
     rpmsg_lite_send(dsp->rpmsg, dsp->ept, MCU_EPT_ADDR, (char *)&msg, sizeof(srtm_message), RL_DONT_BLOCK);
     xos_mutex_unlock(&dsp->rpmsgMutex);
@@ -317,17 +320,32 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
 void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 {
-	char* valStr[4];
+	char charInput[64];
+	char flowPathInitStr[64] = "Success, Flow_path_initialize done";
+//	sprintf(valStr,"%d",value);
+//	char dest[64] = "setCoord/";
+//	char* postStr = "/0/0/";
+//	strcat(dest,paramStr);
+//	strcat(dest,valStr);
+//	strcat(dest,postStr);
+	DSP_PRINTF("[FLOWDSP_SetParam] paramStr: %s\r\nparamValue:%d\r\n", paramStr, value);
+	if(paramStr[0] == '1')
+	{
+		Flow_path_initialize();
+		FlowDSP_SendCmdBack(dsp, flowPathInitStr);
+	}
+	else
+	{
+		memset( charInput, 0, sizeof(charInput) );
+		memcpy( charInput, paramStr, value);
+		if(paramStr[0] == 'm')
+		{
+			DSP_PRINTF("%s\r\n", charInput);
+		}
+		char *flowCmdResult = FlowEngine_query_cmd(engine,charInput);
+		FlowDSP_SendCmdBack(dsp, flowCmdResult);
+	}
 
-	sprintf(valStr,"%d",value);
-	char dest[64] = "setCoord/";
-	char* postStr = "/0/0/";
-	strcat(dest,paramStr);
-	strcat(dest,valStr);
-	strcat(dest,postStr);
-	DSP_PRINTF("[FLOWDSP_SetParam] dest: %s\r\n", dest);
-	FlowEngine_query_cmd(engine,dest);
-	FlowDSP_SendCmdBack(dsp, &dest);
 }
 // TYM DSP add <<
 
