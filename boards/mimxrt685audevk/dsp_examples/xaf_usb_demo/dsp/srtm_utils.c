@@ -290,7 +290,7 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
     msg.head.category = SRTM_MessageCategory_AUDIO;
     msg.head.command  = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = dstMsg;
+    memcpy(msg.flow_msg, dstMsg, dstMsgStrLength);
     msg.param[0] = dstMsgStrLength;
     DSP_PRINTF("%s\r\nReturn string length:%d",dstMsg, dstMsgStrLength);
     xos_mutex_lock(&dsp->rpmsgMutex);

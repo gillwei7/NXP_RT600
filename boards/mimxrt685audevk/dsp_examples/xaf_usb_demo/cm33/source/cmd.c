@@ -339,9 +339,10 @@ static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, c
     }
 }
 #endif
-// TYM DSP add >>
+// TYM FW add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv)
 {
+#if 0
     srtm_message msg = {0};
 
     initMessage(&msg);
@@ -361,6 +362,7 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     	PRINTF("[CM33] USB audio is not ready. \r\n");
     }
     return kStatus_SHELL_Success;
+#endif
 }
 
 void send_FlowPathInit_Cmd(char flowPathInitChar)
@@ -371,7 +373,7 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
     msg.head.minorVersion = SRTM_VERSION_MINOR;
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = &flowPathInitChar;
+    msg.flow_msg[0] = flowPathInitChar;
     msg.param[0] = 1;
 
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
@@ -384,12 +386,12 @@ void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
     msg.head.minorVersion = SRTM_VERSION_MINOR;
     msg.head.category = SRTM_MessageCategory_FLOWCMD;
     msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = flowCmdCharPtr;
+    memcpy(msg.flow_msg, flowCmdCharPtr, cmdLength);
     msg.param[0] = cmdLength;
 
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }
-// TYM DSP add <<
+// TYM FW add <<
 
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg)
 {
@@ -425,6 +427,7 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
 
     if (msg->head.type == SRTM_MessageTypeResponse)
     {
+        // Need to comment for Flow studio using
         //PRINTF("[APP_DSP_IPC_Task] response from DSP, cmd: %d, error: %d\r\n", msg->head.command, msg->error);
     }
 
