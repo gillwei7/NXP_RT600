@@ -56,7 +56,9 @@
 /* SRTM prototypes */
 int srtm_usb_speaker_init(dsp_handle_t *dsp, unsigned int *pCmdParams);
 int srtm_usb_mic_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s);
-
+// TYM DSP add >>
+int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s);
+// TYM DSP add <<
 #if XA_CLIENT_PROXY
 int client_proxy_filter(dsp_handle_t *dsp, int filterOn);
 #endif
@@ -86,14 +88,24 @@ static void BOARD_InitClock(void)
 
     /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);	// TYM DSP add 
     /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
+// TYM DSP add >> 
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
+	
+	CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
+// TYM DSP add <<
 
     /* DMIC uses 24.576MHz AUDIO_PLL clock */
-    CLOCK_AttachClk(kAUDIO_PLL_to_DMIC_CLK);
+//    CLOCK_AttachClk(kAUDIO_PLL_to_DMIC_CLK);	// TYM DSP mark
 
     /* 24.576MHz divided by 4 = 6 144 KHz PDM clock --> gives 48kHz sample rate */
-    CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 4);
+//    CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 4);	// TYM DSP mark
+      CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);	// TYM DSP add
+      SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;		// TYM DSP add
 }
 
 static void XOS_Init(void)
@@ -294,6 +306,26 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
             msg->error = client_proxy_filter(dsp, msg->param[0]);
             break;
 #endif
+// TYM DSP add >>
+        case  SRTM_Command_LINEINOUT:
+            /* Param 0 Number of Channels*/
+            /* Param 1 Sampling Rate*/
+            /* Param 2 PCM bit Width*/
+            DSP_PRINTF("Number of channels %d, sampling rate %d, PCM width %d\r\n", msg->param[0], msg->param[1],
+                       msg->param[2]);
+            if ((msg->param[0] == 0) || (msg->param[1] == 0) || (msg->param[2] == 0))
+            {
+                msg->head.type = SRTM_MessageTypeNotification;
+                msg->error     = SRTM_Status_InvalidParameter;
+            }
+            else
+            {
+                msg->head.type = SRTM_MessageTypeResponse;
+
+                msg->error = srtm_line_inout_init(dsp, &msg->param[0], true);	// TYM DSP add I2S in
+            }
+            break;
+// TYM DSP add <<
 
         /* Unknown message. */
         default:
@@ -307,8 +339,9 @@ static int handleMSG_AUDIO(dsp_handle_t *dsp, srtm_message *msg)
 static int handleMSG_FLOWCMD(dsp_handle_t *dsp, srtm_message *msg)
 {
 	DSP_PRINTF("\n[handleMSG_FLOWCMD]\r\n");
-//	DSP_PRINTF("msg string: %s\r\n", msg->flow_msg);
-//	DSP_PRINTF("msg param: %d\r\n", msg->param[0]);
+	DSP_PRINTF("msg string: %s\r\n", msg->flow_msg);
+	DSP_PRINTF("msg param: %d\r\n", msg->param[0]);
+
 	FLOWDSP_SetParam(dsp, msg->flow_msg, msg->param[0]);
 
 	return 0;

@@ -74,7 +74,6 @@
 /* Maxmimum configurable frame size, based on DMA limits */
 #define MAX_FRAME_SIZE (MAX_DMA_TRANSFER_SIZE * MAX_DMA_TRANSFER_PER_FRAME)
 
-
 typedef struct XARenderer
 {
     /***************************************************************************
@@ -407,8 +406,21 @@ static void evk_hw_renderer_init(void* ptr)
     uint8_t channelNum = d->codec_channels == 1 ? 2 : d->codec_channels;
     uint8_t dmaWidth = d->pcm_width * d->codec_channels > 16 ? 4 : 2;
 
-    I2S_TxGetDefaultConfig(&s_TxConfig);
+#if 1
 
+#endif
+
+
+    I2S_TxGetDefaultConfig(&s_TxConfig);
+#if 1
+//    s_TxConfig.divider = (24576000/48000/32/8);
+//    s_TxConfig.masterSlave = 0x3;
+    s_TxConfig.mode = 0x02;
+	s_TxConfig.dataLength = 32U;
+	s_TxConfig.frameLength = 32 * 8U;
+	s_TxConfig.position = 1U;
+	s_TxConfig.pack48 =true;
+#else
     s_TxConfig.dataLength = d->codec_pcm_width;
     /* Set 32 bit frameLength even for mono channel.
      * Use may vary with different hardware codecs. */
@@ -417,7 +429,7 @@ static void evk_hw_renderer_init(void* ptr)
     s_TxConfig.sckPol = d->i2s_sck_polarity;
     s_TxConfig.wsPol = d->i2s_ws_polarity;
     s_TxConfig.position = d->position;
-
+#endif
     /* Configure I2S master/slave based on configured input */
     if (d->i2s_master)
     {
@@ -753,8 +765,8 @@ static XA_ERRORCODE xa_renderer_init(XARenderer *d, WORD32 i_idx, pVOID pv_value
         memset(d, 0, sizeof(*d));
 
         /* ...default to 48 kHz / 16-bit / 2-channel */
-        d->channels = 2;
-        d->pcm_width = 16;
+        d->channels = 8;//2;	// TYM DSP Tofu: chg from 2 to 8
+        d->pcm_width = 32;//16;	// TYM DSP Tofu: chg from 16 to 32
 #if I2S_SUPPORT_44100_HZ
         d->rate = 44100;
 #else
@@ -771,7 +783,7 @@ static XA_ERRORCODE xa_renderer_init(XARenderer *d, WORD32 i_idx, pVOID pv_value
         /* ...hardware defaults */
         d->i2s_device = 1;
         d->i2s_master = 1;
-        d->i2s_mode = kI2S_ModeI2sClassic;
+        d->i2s_mode = kI2S_ModeDspWsShort;	// TYM DSP chg from classic i2s to TDM
         d->i2s_sck_polarity = 0;
         d->i2s_ws_polarity = 0;
         d->position = 0;
@@ -1088,6 +1100,57 @@ static XA_ERRORCODE xa_renderer_do_exec(XARenderer *d)
 
     return XA_NO_ERROR;
 }
+
+
+/* ...apply gain to 32-bit PCM stream */
+//static XA_ERRORCODE xa_pcm_gain_do_execute_32bit(XAPcmGain *d)
+//{
+//    WORD32     i, nSize;
+//    WORD32    *pIn = (WORD32 *) d->input;
+//    WORD32    *pOut = (WORD32 *) d->output;
+//    UWORD32     filled;
+//    WORD32     input;
+//    WORD16     gain = pcm_gains[d->gain_idx];
+//    WORD64     product;
+//
+//    filled = (d->input_avail > d->buffer_size)?d->buffer_size:d->input_avail;
+//    nSize = filled >> 2;    //size of each sample is 4 bytes
+//
+//    /* ...check I/O buffer */
+//    XF_CHK_ERR(d->input, XA_PCM_GAIN_EXEC_FATAL_INPUT);
+//    XF_CHK_ERR(d->output, XA_PCM_GAIN_EXEC_FATAL_INPUT);
+//
+//    /* ...Processing loop */
+//    for (i = 0; i < nSize; i++)
+//    {
+//        input = *pIn++;
+//        product = (WORD64)input*gain;
+//        product = product >> 12;
+//
+//        if(product > MAX_32BIT)
+//            product = MAX_32BIT;
+//        else if(product < MIN_32BIT)
+//            product = MIN_32BIT;
+//
+//        *pOut++ = (WORD32)product;
+//    }
+//
+//    /* ...save total number of consumed bytes */
+//    //d->consumed = (UWORD32)((void *)pIn - d->input);
+//    d->consumed = filled;
+//
+//    /* ...save total number of produced bytes */
+//    d->produced = (UWORD32)((void *)pOut - d->output);
+//
+//    /* ...put flag saying we have output buffer */
+//    d->state |= XA_PCM_GAIN_FLAG_OUTPUT;
+//
+//    TRACE(PROCESS, _b("produced: %u bytes (%u samples)"), d->produced, nSize);
+//
+//    /* ...return success result code */
+//    return XA_NO_ERROR;
+//}
+
 
 /* ...execution command */
 static XA_ERRORCODE xa_renderer_execute(XARenderer *d, WORD32 i_idx, pVOID pv_value)

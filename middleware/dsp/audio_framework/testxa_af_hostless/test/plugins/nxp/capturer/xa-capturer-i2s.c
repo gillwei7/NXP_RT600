@@ -289,6 +289,7 @@ static void evk_i2s_config(void *ptr)
     rxConfig.mode        = d->i2s_mode;
     rxConfig.sckPol      = d->i2s_sck_polarity;
     rxConfig.wsPol       = d->i2s_ws_polarity;
+    rxConfig.position	 = 1U;	// TYM DSP add
 
     if (d->i2s_master)
     {
@@ -300,7 +301,8 @@ static void evk_i2s_config(void *ptr)
     {
         rxConfig.masterSlave = kI2S_MasterSlaveNormalSlave;
         /* I2S function clock will use external bit clock. */
-        rxConfig.divider = 0;
+//        rxConfig.divider = 0;		// TYM DSP mark
+        rxConfig.divider = (I2S_MCLK_FREQ / d->rate / d->pcm_width / d->channels);	// TYM DSP add: follow alex configuration
     }
 
     if (d->channels == 1)
@@ -313,20 +315,24 @@ static void evk_i2s_config(void *ptr)
     if (d->channels > 2)
     {
         mono = d->channels == 3 ? true : false;
-        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel1, mono, d->pcm_width * 2);
+//        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel1, mono, d->pcm_width * 2);	// TYM DSP mark
+        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel1, mono, d->pcm_width * 2 + rxConfig.position);	// TYM DSP add
     }
     if (d->channels >= 5)
     {
         mono = d->channels == 5 ? true : false;
-        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel2, mono, d->pcm_width * 4);
+//        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel2, mono, d->pcm_width * 4);	// TYM DSP mark
+        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel2, mono, d->pcm_width * 4 + rxConfig.position);	// TYM DSP add
     }
     if (d->channels >= 7)
     {
         mono = d->channels == 7 ? true : false;
-        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel3, mono, d->pcm_width * 6);
+//        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel3, mono, d->pcm_width * 6);	// TYM DSP mark
+        I2S_EnableSecondaryChannel(i2s_device_map[d->i2s_device], kI2S_SecondaryChannel3, mono, d->pcm_width * 6 + rxConfig.position);	// TYM DSP add
     }
 
-    DMA_SetChannelPriority(DMA_CAPTURER, dma_channel_map[d->i2s_device], kDMA_ChannelPriority3);
+//    DMA_SetChannelPriority(DMA_CAPTURER, dma_channel_map[d->i2s_device], kDMA_ChannelPriority3);	// TYM DSP mark
+    DMA_SetChannelPriority(DMA_CAPTURER, dma_channel_map[d->i2s_device], kDMA_ChannelPriority2);	// TYM DSP add: chg priority from 3 to 2
     DMA_CreateHandle(&d->i2sRxDmaHandle, DMA_CAPTURER, dma_channel_map[d->i2s_device]);
     DMA_SetCallback(&d->i2sRxDmaHandle, RxCaptureCallbackISR, ptr);
 

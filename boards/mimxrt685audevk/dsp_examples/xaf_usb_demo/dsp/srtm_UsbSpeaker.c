@@ -26,6 +26,7 @@
 #include "dsp_config.h"
 #include "srtm_utils.h"
 #include "srtm_config_audio.h"
+#include "fsl_i2s.h"	// TYM DSP add: tofu
 
 /*******************************************************************************
  * Definitions
@@ -33,8 +34,8 @@
 #define AUDIO_FRMWK_BUF_SIZE (64 * 1024)
 #define AUDIO_COMP_BUF_SIZE  (256 * 1024)
 
-#define PCM_GAIN_FRAME_SIZE (192)
-#define RENDERER_FRAME_SIZE (192)
+#define PCM_GAIN_FRAME_SIZE (1024)	// TYM DSP add: tofu
+#define RENDERER_FRAME_SIZE (1024)	// TYM DSP add: tofu
 
 enum
 {
@@ -160,7 +161,8 @@ static int client_proxy_setup(void *p_comp, xaf_format_t *format)
 
 static XAF_ERR_CODE renderer_setup(void *p_renderer, xaf_format_t *format)
 {
-    int param[14];
+    int param[19];		// TYM DSP chg: tofu
+    int num_param = 7;	// TYM DSP chg: tofu
 
     param[0]  = XA_RENDERER_CONFIG_PARAM_PCM_WIDTH;
     param[1]  = format->pcm_width;
@@ -176,8 +178,21 @@ static XAF_ERR_CODE renderer_setup(void *p_renderer, xaf_format_t *format)
     param[11] = (int)DSP_AUDIO_BUFFER_1_PONG;
     param[12] = XA_RENDERER_CONFIG_PARAM_I2S_INTERFACE;
     param[13] = AUDIO_I2S_RENDERER_DEVICE;
+// TYM DSP add >>
+    if (format->channels > 2)
+    {
+        num_param = 10;
 
-    return xaf_comp_set_config(p_renderer, 7, &param[0]);
+        param[14] = XA_RENDERER_CONFIG_PARAM_I2S_MODE;
+        param[15] = kI2S_ModeDspWsShort;
+        param[16] = XA_RENDERER_CONFIG_PARAM_I2S_WS_POLARITY;
+        param[17] = true;
+        param[18] = XA_RENDERER_CONFIG_PARAM_I2S_POSITION;
+        param[19] = 1U;
+    }
+
+    return xaf_comp_set_config(p_renderer, num_param, &param[0]);
+// TYM DSP add <<
 }
 
 /* Explicitly start the renderer component.

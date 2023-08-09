@@ -28,9 +28,6 @@ int test_num = 0;
  * Utility Functions
  ******************************************************************************/
 
-// TYM DSP add >>
-#define BUF_SIZE 100*1024
-uint8_t MEMPOOL_BUF[BUF_SIZE];
 
 typedef enum {
 	HAL_GPT_STATUS_ERROR_RESTART_ERROR	 = -7,	/**< The SW GPT is restart the same timer that has not expired. */
@@ -57,31 +54,54 @@ hal_gpt_status_t hal_gpt_get_free_run_count(hal_gpt_clock_source_t clock_source,
 }
 
 //extern void TEST_ALL_AOS(void);
-FlowEngine*	engine;
-
+extern FlowEngine* engine;
 void Flow_path_initialize()
 {
-		printf("[TYM] Flow_path_initialize\r\n");
-	    FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
-	    engine = FlowEngine_create("engine", NULL, 2, 2);
-	    FlowEngine_prepare(engine, 48000, 48);
-
-	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/1/");
-	    FlowEngine_query_cmd(engine, "clearLayout/");
-	    FlowEngine_query_cmd(engine, "init/5/");
-	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_1/3/-1/-1/-1/0/");
-	    FlowEngine_query_cmd(engine, "obj/IN/IN_1/0/-1/-1/-1/0/");
-	    FlowEngine_query_cmd(engine, "obj/IN/IN_2/1/-1/-1/-1/0/");
-	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_2/4/-1/-1/-1/0/");
-	    FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/2/2/2/1/0/");
-	    FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/-40.0/0/0/");
-	    FlowEngine_query_cmd(engine, "reprepare/");
-	    FlowEngine_query_cmd(engine, "buildProcStep/");
-	    FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
-	    FlowEngine_query_cmd(engine, "wire/IN_2@0/GAIN_1@1/");
-	    FlowEngine_query_cmd(engine, "wire/GAIN_1@0/OUT_1@0/");
-	    FlowEngine_query_cmd(engine, "wire/GAIN_1@1/OUT_2@0/");
-	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/0/");
+//		printf("[TYM] Flow_path_initialize\r\n");
+//	    FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
+//	    engine = FlowEngine_create("engine", NULL, 8, 8);
+//	    FlowEngine_prepare(engine, 48000, 32);
+//
+//	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/1/");
+//	    FlowEngine_query_cmd(engine, "clearLayout/");
+//	    FlowEngine_query_cmd(engine, "init/17/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_1/0/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_2/1/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_3/2/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_4/3/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_5/4/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_6/5/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_7/6/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/IN/IN_8/7/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_1/9/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_2/10/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_3/11/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_4/12/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_5/13/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_6/14/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_7/15/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/OUT/OUT_8/16/-1/-1/-1/0/");
+//	    FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/8/8/8/1/0/");
+//	    FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/-12.0/0/0/");
+//	    FlowEngine_query_cmd(engine, "reprepare/");
+//	    FlowEngine_query_cmd(engine, "buildProcStep/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_2@0/GAIN_1@1/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_3@0/GAIN_1@2/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_4@0/GAIN_1@3/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_5@0/GAIN_1@4/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_6@0/GAIN_1@5/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_7@0/GAIN_1@6/");
+//	    FlowEngine_query_cmd(engine, "wire/IN_8@0/GAIN_1@7/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@0/OUT_1@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@1/OUT_2@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@2/OUT_3@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@3/OUT_4@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@4/OUT_5@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@5/OUT_6@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@6/OUT_7@0/");
+//	    FlowEngine_query_cmd(engine, "wire/GAIN_1@7/OUT_8@0/");
+//	    FlowEngine_query_cmd(engine, "setRoot/lockAudio/0/");
 
 }
 
@@ -282,6 +302,7 @@ void DSP_SendUsbError(dsp_handle_t *dsp, usb_device_type_t usb_dev)
 void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 {
     srtm_message msg = {0};
+    uint32_t dstMsgStrLength = strlen(dstMsg);
 
     msg.head.type         = SRTM_MessageTypeRequest;
     msg.head.majorVersion = SRTM_VERSION_MAJOR;
@@ -289,7 +310,9 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
     msg.head.category = SRTM_MessageCategory_AUDIO;
     msg.head.command  = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg = dstMsg;
+    memcpy(msg.flow_msg, dstMsg, dstMsgStrLength);
+    msg.param[0] = dstMsgStrLength;
+    DSP_PRINTF("%s\r\nReturn string length:%d",dstMsg, dstMsgStrLength);
     xos_mutex_lock(&dsp->rpmsgMutex);
     rpmsg_lite_send(dsp->rpmsg, dsp->ept, MCU_EPT_ADDR, (char *)&msg, sizeof(srtm_message), RL_DONT_BLOCK);
     xos_mutex_unlock(&dsp->rpmsgMutex);
@@ -297,17 +320,32 @@ void FlowDSP_SendCmdBack(dsp_handle_t *dsp, char* dstMsg)
 
 void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 {
-	char* valStr[4];
+	char charInput[64];
+	char flowPathInitStr[64] = "Success, Flow_path_initialize done";
+//	sprintf(valStr,"%d",value);
+//	char dest[64] = "setCoord/";
+//	char* postStr = "/0/0/";
+//	strcat(dest,paramStr);
+//	strcat(dest,valStr);
+//	strcat(dest,postStr);
+	DSP_PRINTF("[FLOWDSP_SetParam] paramStr: %s\r\nparamValue:%d\r\n", paramStr, value);
+	if(paramStr[0] == '1')
+	{
+		Flow_path_initialize();
+		FlowDSP_SendCmdBack(dsp, flowPathInitStr);
+	}
+	else
+	{
+		memset( charInput, 0, sizeof(charInput) );
+		memcpy( charInput, paramStr, value);
+		if(paramStr[0] == 'm')
+		{
+			DSP_PRINTF("%s\r\n", charInput);
+		}
+		char *flowCmdResult = FlowEngine_query_cmd(engine,charInput);
+		FlowDSP_SendCmdBack(dsp, flowCmdResult);
+	}
 
-	sprintf(valStr,"%d",value);
-	char dest[64] = "setCoord/";
-	char* postStr = "/0/0/";
-	strcat(dest,paramStr);
-	strcat(dest,valStr);
-	strcat(dest,postStr);
-	DSP_PRINTF("[FLOWDSP_SetParam] dest: %s\r\n", dest);
-	FlowEngine_query_cmd(engine,dest);
-	FlowDSP_SendCmdBack(dsp, &dest);
 }
 // TYM DSP add <<
 
@@ -398,8 +436,8 @@ int DSP_ProcessThread(void *arg, int wake_value)
 //            DSP_PRINTF("dst : %d\r\n", temp);
 //            DSP_PRINTF("[TYM] read_size : %d, buffer_len: %d\r\n", read_size, buffer_len);
 
-    	    FlowEngine_ProcessInt16(engine, buffer, buffer);
-        	// TYM¡@DSP >>
+    	    FlowEngine_ProcessInt32(engine, buffer, buffer);
+        	// TYM DSP >>
 //            test_num++;
 //            int8_t tempB1 = 0;
 //            int8_t tempB2 = 0;

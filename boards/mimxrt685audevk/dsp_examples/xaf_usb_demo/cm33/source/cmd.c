@@ -15,6 +15,10 @@
 #include "fsl_shell.h"
 
 #include "composite.h"
+// TYM FW add >>
+#include "pin_mux.h"
+#include "fsl_gpio.h"
+// TYM FW add <<
 /*${header:end}*/
 
 /*******************************************************************************
@@ -36,6 +40,7 @@ static shell_status_t shellUsbSpeaker(shell_handle_t shellHandle, int32_t argc, 
 static shell_status_t shellUsbMic(shell_handle_t shellHandle, int32_t argc, char **argv);
 // TYM DSP add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, char **argv);
 // TYM DSP add <<
 #if XA_CLIENT_PROXY
 static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, char **argv);
@@ -97,6 +102,12 @@ SHELL_COMMAND_DEFINE(usb_mic,
                      1);
 // TYM DSP add >>
 SHELL_COMMAND_DEFINE(flow, "\r\n\"flow\": Send command to control FlowDSP param\r\n", shellFlowDSP, 2);
+SHELL_COMMAND_DEFINE(line,
+					 "\r\n\"line\": Perform line in & out and playback on DSP\r\n"
+					 "  USAGE: line [start]\r\n"
+					 "	  start			Start line in & out and playback on DSP\r\n",
+					 shellLineInOut,
+					 1);
 // TYM DSP add <<
 static bool usb_playing   = false;
 static bool usb_recording = false;
@@ -107,6 +118,9 @@ static shell_handle_t s_shellHandle;
 extern serial_handle_t g_serialHandle;
 static handleShellMessageCallback_t *g_handleShellMessageCallback;
 static void *g_handleShellMessageCallbackData;
+// TYM FW add >>
+extern int8_t FlowCmdStep;
+// TYM FW add <<
 /*${variable:end}*/
 
 /*******************************************************************************
@@ -175,12 +189,21 @@ static shell_status_t shellUsbSpeaker(shell_handle_t shellHandle, int32_t argc, 
             /* Param 3 sampling_rate */
             /* Param 4 pcm_width */
             msg.param[0] = (uint32_t)(&audioPlayDataBuff[0]);
+#if 0
             msg.param[1] = 2 * ((0U != g_composite.audioUnified.audioPlayTransferSize) ?
                                     g_composite.audioUnified.audioPlayTransferSize :
                                     HS_ISO_OUT_ENDP_PACKET_SIZE);
             msg.param[2] = AUDIO_IN_FORMAT_CHANNELS;
             msg.param[3] = AUDIO_IN_SAMPLING_RATE;
             msg.param[4] = AUDIO_IN_FORMAT_BITS;
+#else
+            // TYM DSP add tofu>>
+            msg.param[1] = 1024;
+            msg.param[2] = 8;
+            msg.param[3] = 48000;
+            msg.param[4] = 32;
+            // TYM DSP add tofu<<
+#endif
 
             g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
         }
@@ -336,9 +359,10 @@ static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, c
     }
 }
 #endif
-// TYM DSP add >>
+// TYM FW add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv)
 {
+#if 0
     srtm_message msg = {0};
 
     initMessage(&msg);
@@ -358,8 +382,81 @@ static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, cha
     	PRINTF("[CM33] USB audio is not ready. \r\n");
     }
     return kStatus_SHELL_Success;
+#endif
+}
+
+static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, char **argv)
+{
+    srtm_message msg = {0};
+
+    initMessage(&msg);
+
+    msg.head.category = SRTM_MessageCategory_AUDIO;
+    msg.head.command = SRTM_Command_LINEINOUT;
+
+    /* Param 0 Number of Channels*/
+    /* Param 1 Sampling Rate*/
+    /* Param 2 PCM bit Width*/
+
+    msg.param[0] = 8;		// TYM DSP set for TDM
+    msg.param[1] = 48000;	// TYM DSP chg from 16k to 48k
+//    msg.param[1] = 16000;	// DMIC in 16k
+    msg.param[2] = 32;		// TYM DSP set for TDM
+    PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+
+    return kStatus_SHELL_Success;
 }
 // TYM DSP add <<
+void send_FlowPathInit_Cmd(char flowPathInitChar)
+{
+#if 1
+    srtm_message msg = {0};
+
+    initMessage(&msg);
+
+    msg.head.category = SRTM_MessageCategory_AUDIO;
+    msg.head.command = SRTM_Command_LINEINOUT;
+
+    /* Param 0 Number of Channels*/
+    /* Param 1 Sampling Rate*/
+    /* Param 2 PCM bit Width*/
+
+    msg.param[0] = 8;       // TYM DSP set for TDM
+    msg.param[1] = 48000;   // TYM DSP chg from 16k to 48k
+//    msg.param[1] = 16000; // DMIC in 16k
+    msg.param[2] = 32;      // TYM DSP set for TDM
+    //PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+#else
+	srtm_message msg = {0};
+    msg.head.type = SRTM_MessageTypeRequest;
+    msg.head.majorVersion = SRTM_VERSION_MAJOR;
+    msg.head.minorVersion = SRTM_VERSION_MINOR;
+    msg.head.category = SRTM_MessageCategory_FLOWCMD;
+    msg.head.command = SRTM_Command_FlowDSPSetParam;
+    msg.flow_msg[0] = flowPathInitChar;
+    msg.param[0] = 1;
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+#endif
+}
+void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
+{
+    srtm_message msg = {0};
+    msg.head.type = SRTM_MessageTypeRequest;
+    msg.head.majorVersion = SRTM_VERSION_MAJOR;
+    msg.head.minorVersion = SRTM_VERSION_MINOR;
+    msg.head.category = SRTM_MessageCategory_FLOWCMD;
+    msg.head.command = SRTM_Command_FlowDSPSetParam;
+    memcpy(msg.flow_msg, flowCmdCharPtr, cmdLength);
+    msg.param[0] = cmdLength;
+
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+}
+// TYM FW add <<
 
 void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *arg)
 {
@@ -376,6 +473,7 @@ void shellCmd(handleShellMessageCallback_t *handleShellMessageCallback, void *ar
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(usb_mic));
     // TYM DSP add >>
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(flow));
+    SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(line));
     // TYM DSP add <<
     g_handleShellMessageCallback     = handleShellMessageCallback;
     g_handleShellMessageCallbackData = arg;
@@ -395,7 +493,8 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
 
     if (msg->head.type == SRTM_MessageTypeResponse)
     {
-        PRINTF("[APP_DSP_IPC_Task] response from DSP, cmd: %d, error: %d\r\n", msg->head.command, msg->error);
+        // Need to comment for Flow studio using
+        //PRINTF("[APP_DSP_IPC_Task] response from DSP, cmd: %d, error: %d\r\n", msg->head.command, msg->error);
     }
 
     /* Processing returned data*/
@@ -642,14 +741,42 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                 	}
                 	else
                 	{
-                		PRINTF("[DSP->MCU] DSP FlowDSP set parameter success!\r\n");
-                		PRINTF("[DSP->MCU] Set command: %s\r\n",msg->flow_msg);
+                        if( FlowCmdStep == FlowCmd_Step0_PreFlowPathInit)
+                        {
+                            if( msg->flow_msg[0] == 'S' && msg->flow_msg[1] == 'u' && msg->flow_msg[2] == 'c')
+                            {
+                                //PRINTF( msg->flow_msg, "%s");
+                                FlowCmdStep = FlowCmd_Step1_Header1;
+                                GPIO_PinWrite(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, 1);
+                            }
+                            else
+                            {
+                                // Encounter some error
+                                PRINTF( "Error on Flow Path initialize\r\n");
+                            }
+                        }
+                        else
+                        {
+                            USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+                            uint8_t dest[64];
+                            memset(dest, 0, sizeof(dest));
+                            dest[0] = 1;
+                            dest[1] = 0;
+                            dest[2] = 0;
+                            dest[3] = msg->param[0];
+
+                            memcpy( &dest[4], msg->flow_msg, msg->param[0] );
+                            // TODO modify to serial manager write
+                            USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
+                        }
                 	}
+                	*notify_shell = true;
                 	break;
                 }
                 // TYM DSP add <<
                 default:
-                    PRINTF("Incoming unknown message category %d \r\n", msg->head.category);
+                    // TODO TYM FW add need define
+                    //PRINTF("Incoming unknown message category %d \r\n", msg->head.category);
                     break;
             }
             break;
