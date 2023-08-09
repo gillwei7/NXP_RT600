@@ -15,6 +15,10 @@
 #include "fsl_shell.h"
 
 #include "composite.h"
+// TYM FW add >>
+#include "pin_mux.h"
+#include "fsl_gpio.h"
+// TYM FW add <<
 /*${header:end}*/
 
 /*******************************************************************************
@@ -423,7 +427,7 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
     msg.param[1] = 48000;   // TYM DSP chg from 16k to 48k
 //    msg.param[1] = 16000; // DMIC in 16k
     msg.param[2] = 32;      // TYM DSP set for TDM
-    PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
+    //PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
 
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 #else
@@ -741,8 +745,9 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                         {
                             if( msg->flow_msg[0] == 'S' && msg->flow_msg[1] == 'u' && msg->flow_msg[2] == 'c')
                             {
-                                PRINTF( msg->flow_msg, "%s");
+                                //PRINTF( msg->flow_msg, "%s");
                                 FlowCmdStep = FlowCmd_Step1_Header1;
+                                GPIO_PinWrite(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, 1);
                             }
                             else
                             {
@@ -770,7 +775,8 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                 }
                 // TYM DSP add <<
                 default:
-                    PRINTF("Incoming unknown message category %d \r\n", msg->head.category);
+                    // TODO TYM FW add need define
+                    //PRINTF("Incoming unknown message category %d \r\n", msg->head.category);
                     break;
             }
             break;

@@ -56,7 +56,7 @@ static ctimer_config_t ctimerInfoPll;
 static app_handle_t app;
 extern serial_handle_t g_serialHandle;
 static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_serialReadHandle);
-
+extern int8_t FlowCmdStep;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -174,6 +174,40 @@ void handleShellMessage(srtm_message *msg, void *arg)
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
+static bool checkShellCmdState(void)
+{
+    char flowPathInitChar = '1';
+    if(FlowCmdStep == FlowCmd_Step0_PreFlowPathInit)
+    {
+
+//        PRINTF("checkShellCmdState:FlowCmd_Step0_PreFlowPathInit start\r\n");
+        send_FlowPathInit_Cmd(flowPathInitChar);
+    }
+    else
+    {
+        PRINTF("checkShellCmdState:%d\r\n",FlowCmdStep);
+    }
+}
+
+void APP_Trigger_Task(void *param)
+{
+    /* Define the init structure for the output LED pin*/
+    gpio_pin_config_t led_config = {
+        kGPIO_DigitalOutput,
+        0,
+    };
+    PRINTF("[APP_Trigger_Task] start\r\n");
+    while (1)
+    {
+        vTaskDelay( pdMS_TO_TICKS( 5000 ) );
+        GPIO_PortInit(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT);
+        GPIO_PinInit(GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, &led_config);
+//        GPIO_PinWrite(BOARD_INITPINS_LED00853_GPIO, BOARD_INITPINS_LED00853_PORT, BOARD_INITPINS_LED00853_PIN, 1);
+        /* Check shell read command state */
+        checkShellCmdState();
+    }
+}
+
 void APP_Shell_Task(void *param)
 {
     PRINTF("[APP_Shell_Task] start\r\n");
@@ -247,8 +281,8 @@ int main(void)
     /* Initialize USB */
     USB_DeviceApplicationInit();
 
-    /* Set IPC processing task priority = 2 */
-    if (xTaskCreate(APP_DSP_IPC_Task, "DSP Msg Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 2,
+    /* Set IPC processing task priority = 3 */
+    if (xTaskCreate(APP_DSP_IPC_Task, "DSP Msg Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 3,
                     &app.ipc_task_handle) != pdPASS)
     {
         PRINTF("\r\nFailed to create application task\r\n");
@@ -261,6 +295,15 @@ int main(void)
                     &app.shell_task_handle) != pdPASS)
     {
         PRINTF("\r\nFailed to create application task\r\n");
+        while (1)
+            ;
+    }
+
+    /* Set Trigger Initial command task priority = 2 */
+    if (xTaskCreate(APP_Trigger_Task, "Trigger Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 2,
+                    &app.trigger_task_handle) != pdPASS)
+    {
+        PRINTF("\r\nFailed to create APP_Trigger_Task\r\n");
         while (1)
             ;
     }

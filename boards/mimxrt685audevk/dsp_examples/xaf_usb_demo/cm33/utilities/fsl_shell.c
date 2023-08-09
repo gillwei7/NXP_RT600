@@ -357,10 +357,10 @@ void Flow_Cmd_Read(uint8_t character)
     switch(FlowCmdStep)
     {
         case FlowCmd_Step0_PreFlowPathInit:
-            if(character == '1')
-            {
-                send_FlowPathInit_Cmd(character);
-            }
+//            if(character == '1')
+//            {
+//                send_FlowPathInit_Cmd(character);
+//            }
             break;
 
         case FlowCmd_Step1_Header1:

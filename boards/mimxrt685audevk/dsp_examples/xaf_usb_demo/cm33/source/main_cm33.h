@@ -23,6 +23,7 @@ typedef struct _app_handle
 {
     TaskHandle_t shell_task_handle;
     TaskHandle_t ipc_task_handle;
+    TaskHandle_t trigger_task_handle;
 } app_handle_t;
 
 enum
