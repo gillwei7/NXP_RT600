@@ -250,7 +250,7 @@ static int renderer_start_operation(void *p_comp)
 
 
 // TYM DSP add >>
-#define BUF_SIZE 100*1024
+#define BUF_SIZE 150 * 1024
 static uint8_t MEMPOOL_BUF[BUF_SIZE];
 static uint8_t FlowExecOnce = 0;
 FlowEngine*	engine = NULL;
@@ -363,7 +363,7 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
 		FlowEngine_query_cmd(engine, "obj/OUT/OUT_7/15/-1/-1/-1/0/");
 		FlowEngine_query_cmd(engine, "obj/OUT/OUT_8/16/-1/-1/-1/0/");
 		FlowEngine_query_cmd(engine, "obj/GAIN/GAIN_1/8/8/8/1/0/");
-		FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/12.0/0/0/");
+		FlowEngine_query_cmd(engine, "setCoord/GAIN_1/gain/0.0/0/0/");
 		FlowEngine_query_cmd(engine, "reprepare/");
 		FlowEngine_query_cmd(engine, "buildProcStep/");
 		FlowEngine_query_cmd(engine, "wire/IN_1@0/GAIN_1@0/");
