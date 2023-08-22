@@ -484,9 +484,9 @@ int main(void)
     xos_register_interrupt_handler(XCHAL_EXTINT19_NUM, (XosIntFunc *)DMA_IRQHandle, DMA1);
     xos_interrupt_enable(XCHAL_EXTINT19_NUM);
 
-    xos_thread_create(&thread_main, NULL, DSP_Main, &dsp, "DSP Main", dsp_thread_stack, DSP_THREAD_STACK_SIZE,
-                      DSP_THREAD_PRIORITY, 0, 0);
-
+    xos_thread_create(&thread_main, NULL, DSP_Main, &dsp, "DSP Main", dsp_thread_stack, DSP_THREAD_STACK_SIZE * 5,
+                      DSP_THREAD_PRIORITY - 9, 0, 0);
+    xos_preemption_enable();
     /* Start XOS scheduler - does not return */
     xos_start(0);
 

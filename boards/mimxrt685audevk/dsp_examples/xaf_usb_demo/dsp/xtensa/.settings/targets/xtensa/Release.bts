@@ -145,6 +145,10 @@
                         <key>CreateMinsize</key>
                         <value selected="true"/>
                     </BooleanMapEntry>
+                    <BooleanMapEntry>
+                        <key>GenerateMapFile</key>
+                        <value selected="true"/>
+                    </BooleanMapEntry>
                 </BooleanMapOptions>
                 <StringListMapOptions>
                     <StringListMapEntry>
