@@ -1,3 +1,0 @@
-opus_header.o: \
-  D:\RT600\SDK\middleware\dsp\audio_framework\testxa_af_hostless\test\plugins\cadence\opus_dec\opus_header.c \
-  D:\RT600\SDK\middleware\dsp\audio_framework\testxa_af_hostless\test\plugins\cadence\opus_dec\opus_header.h

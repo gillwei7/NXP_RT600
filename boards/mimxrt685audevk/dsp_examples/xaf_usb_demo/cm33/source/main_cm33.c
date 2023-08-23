@@ -53,7 +53,7 @@ extern usb_device_composite_struct_t g_composite;
 ctimer_callback_t *cb_func_pll[] = {(ctimer_callback_t *)CTIMER_SOF_TOGGLE_HANDLER_PLL};
 static ctimer_config_t ctimerInfoPll;
 #endif
-static app_handle_t app;
+app_handle_t app;
 extern serial_handle_t g_serialHandle;
 static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_serialReadHandle);
 extern int8_t FlowCmdStep;
@@ -179,8 +179,6 @@ static bool checkShellCmdState(void)
     char flowPathInitChar = '1';
     if(FlowCmdStep == FlowCmd_Step0_PreFlowPathInit)
     {
-
-//        PRINTF("checkShellCmdState:FlowCmd_Step0_PreFlowPathInit start\r\n");
         send_FlowPathInit_Cmd(flowPathInitChar);
     }
     else
@@ -189,20 +187,21 @@ static bool checkShellCmdState(void)
     }
 }
 
-void APP_Trigger_Task(void *param)
+void APP_Audio_Path_Init_Task(void *param)
 {
     /* Define the init structure for the output LED pin*/
     gpio_pin_config_t led_config = {
         kGPIO_DigitalOutput,
         0,
     };
-    PRINTF("[APP_Trigger_Task] start\r\n");
+    PRINTF("[APP_Audio_Path_Init_Task] start\r\n");
+    GPIO_PortInit(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT);
+    GPIO_PinInit(GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, &led_config);
+
     while (1)
     {
-        vTaskDelay( pdMS_TO_TICKS( 5000 ) );
-        GPIO_PortInit(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT);
-        GPIO_PinInit(GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, &led_config);
-//        GPIO_PinWrite(BOARD_INITPINS_LED00853_GPIO, BOARD_INITPINS_LED00853_PORT, BOARD_INITPINS_LED00853_PIN, 1);
+        vTaskDelay( pdMS_TO_TICKS( AUDIO_PATH_INIT_MS ) );
+
         /* Check shell read command state */
         checkShellCmdState();
     }
@@ -299,11 +298,11 @@ int main(void)
             ;
     }
 
-    /* Set Trigger Initial command task priority = 2 */
-    if (xTaskCreate(APP_Trigger_Task, "Trigger Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 2,
-                    &app.trigger_task_handle) != pdPASS)
+    /* Set Audio Path Init task priority = 2 */
+    if (xTaskCreate(APP_Audio_Path_Init_Task, "Audio Path Init Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 2,
+                    &app.audio_path_init_task_handle) != pdPASS)
     {
-        PRINTF("\r\nFailed to create APP_Trigger_Task\r\n");
+        PRINTF("\r\nFailed to create APP_Audio_Path_Init_Task\r\n");
         while (1)
             ;
     }

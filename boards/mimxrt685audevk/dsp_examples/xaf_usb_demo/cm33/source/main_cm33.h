@@ -15,7 +15,9 @@
 #include "rpmsg_ns.h"
 #include "rpmsg_queue.h"
 
-#define CUSTOM_SHELL_TASK 1
+#define CUSTOM_SHELL_TASK          1
+#define AUDIO_PATH_INIT_MS         5000
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -23,7 +25,7 @@ typedef struct _app_handle
 {
     TaskHandle_t shell_task_handle;
     TaskHandle_t ipc_task_handle;
-    TaskHandle_t trigger_task_handle;
+    TaskHandle_t audio_path_init_task_handle;
 } app_handle_t;
 
 enum

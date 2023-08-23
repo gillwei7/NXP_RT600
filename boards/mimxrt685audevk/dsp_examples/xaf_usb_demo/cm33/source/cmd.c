@@ -18,6 +18,8 @@
 // TYM FW add >>
 #include "pin_mux.h"
 #include "fsl_gpio.h"
+#include "task.h"
+#include "fsl_usart.h"
 // TYM FW add <<
 /*${header:end}*/
 
@@ -47,6 +49,7 @@ static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, c
 #endif
 // TYM DSP add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
+extern app_handle_t app;
 // TYM DSP add <<
 
 /*${prototype:end}*/
@@ -411,7 +414,6 @@ static shell_status_t shellLineInOut(shell_handle_t shellHandle, int32_t argc, c
 // TYM DSP add <<
 void send_FlowPathInit_Cmd(char flowPathInitChar)
 {
-#if 1
     srtm_message msg = {0};
 
     initMessage(&msg);
@@ -430,18 +432,6 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
     //PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
 
     g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
-#else
-	srtm_message msg = {0};
-    msg.head.type = SRTM_MessageTypeRequest;
-    msg.head.majorVersion = SRTM_VERSION_MAJOR;
-    msg.head.minorVersion = SRTM_VERSION_MINOR;
-    msg.head.category = SRTM_MessageCategory_FLOWCMD;
-    msg.head.command = SRTM_Command_FlowDSPSetParam;
-    msg.flow_msg[0] = flowPathInitChar;
-    msg.param[0] = 1;
-
-    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
-#endif
 }
 void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
 {
@@ -748,6 +738,11 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                                 //PRINTF( msg->flow_msg, "%s");
                                 FlowCmdStep = FlowCmd_Step1_Header1;
                                 GPIO_PinWrite(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, 1);
+                                // Use the handle to delete the task.
+                                if( app->audio_path_init_task_handle != NULL )
+                                {
+                                    vTaskDelete( app->audio_path_init_task_handle );
+                                }
                             }
                             else
                             {
