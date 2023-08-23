@@ -5,3 +5,4 @@ boards/mimxrt685audevk/dsp_examples/xaf_usb_demo/dsp/xtensa/bin/*
 *.o
 *.d
 boards/mimxrt685audevk/dsp_examples/xaf_usb_demo/cm33/.settings/language.settings.xml
+/**.o

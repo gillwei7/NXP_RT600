@@ -328,6 +328,7 @@ void FLOWDSP_SetParam(dsp_handle_t *dsp, char* paramStr,int32_t value)
 //	strcat(dest,paramStr);
 //	strcat(dest,valStr);
 //	strcat(dest,postStr);
+	xos_thread_yield();
 	DSP_PRINTF("[FLOWDSP_SetParam] paramStr: %s\r\nparamValue:%d\r\n", paramStr, value);
 	if(paramStr[0] == '1')
 	{
