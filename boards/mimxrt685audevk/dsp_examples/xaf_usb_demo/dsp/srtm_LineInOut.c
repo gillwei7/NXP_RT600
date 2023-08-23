@@ -250,7 +250,7 @@ static int renderer_start_operation(void *p_comp)
 
 
 // TYM DSP add >>
-#define BUF_SIZE 400 * 1024
+#define BUF_SIZE 512 * 1024
 //AT_QUICKACCESS_SECTION_DATA (uint8_t MEMPOOL_BUF[BUF_SIZE]);
 uint8_t* MEMPOOL_BUF;
 static uint8_t FlowExecOnce = 0;
