@@ -86,16 +86,21 @@ static void BOARD_InitClock(void)
     /* MUB interrupt signal is selected for DSP interrupt input 1 */
     INPUTMUX_AttachSignal(INPUTMUX, 1U, kINPUTMUX_MuBToDspInterrupt);
 
+#if 1
+
+    SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_SHIFT;		// TYM DSP add
+
+#else
     /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
-    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);	// TYM DSP add 
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);	// TYM DSP add
     /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
-// TYM DSP add >> 
+// TYM DSP add >>
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
-	
+
 	CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
 // TYM DSP add <<
 
@@ -106,6 +111,8 @@ static void BOARD_InitClock(void)
 //    CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 4);	// TYM DSP mark
       CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);	// TYM DSP add
       SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;		// TYM DSP add
+
+#endif
 }
 
 static void XOS_Init(void)

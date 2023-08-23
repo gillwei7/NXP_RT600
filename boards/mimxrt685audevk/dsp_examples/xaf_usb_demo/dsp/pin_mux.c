@@ -329,25 +329,46 @@ void BOARD_InitPins(void)
     IOPCTL_PinMuxSet(IOPCTL, 0U, 9U, port0_pin9_config);
 
     const uint32_t port1_pin10_config = (/* Pin is configured as MCLK */
-                                         IOPCTL_PIO_FUNC1 |
-                                         /* Disable pull-up / pull-down function */
-                                         IOPCTL_PIO_PUPD_DI |
-                                         /* Enable pull-down function */
-                                         IOPCTL_PIO_PULLDOWN_EN |
-                                         /* Disable input buffer function */
-                                         IOPCTL_PIO_INBUF_DI |
-                                         /* Normal mode */
-                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
-                                         /* Full drive enable */
-                                         IOPCTL_PIO_FULLDRIVE_EN |
-                                         /* Analog mux is disabled */
-                                         IOPCTL_PIO_ANAMUX_DI |
-                                         /* Pseudo Output Drain is disabled */
-                                         IOPCTL_PIO_PSEDRAIN_DI |
-                                         /* Input function is not inverted */
-                                         IOPCTL_PIO_INV_DI);
-    /* PORT1 PIN10 (coords: F2) is configured as MCLK */
-    IOPCTL_PinMuxSet(IOPCTL, 1U, 10U, port1_pin10_config);
+                                             IOPCTL_PIO_FUNC1 |
+                                             /* Disable pull-up / pull-down function */
+                                             IOPCTL_PIO_PUPD_DI |
+                                             /* Enable pull-down function */
+                                             IOPCTL_PIO_PULLDOWN_EN |
+                                             /* Enables input buffer function */
+                                             IOPCTL_PIO_INBUF_EN |
+                                             /* Normal mode */
+                                             IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                             /* Full drive enable */
+                                             IOPCTL_PIO_FULLDRIVE_EN |
+                                             /* Analog mux is disabled */
+                                             IOPCTL_PIO_ANAMUX_DI |
+                                             /* Pseudo Output Drain is disabled */
+                                             IOPCTL_PIO_PSEDRAIN_DI |
+                                             /* Input function is not inverted */
+                                             IOPCTL_PIO_INV_DI);
+        /* PORT1 PIN10 (coords: F2) is configured as MCLK */
+        IOPCTL_PinMuxSet(IOPCTL, 1U, 10U, port1_pin10_config);
+
+//    const uint32_t port1_pin10_config = (/* Pin is configured as MCLK */
+//                                         IOPCTL_PIO_FUNC1 |
+//                                         /* Disable pull-up / pull-down function */
+//                                         IOPCTL_PIO_PUPD_DI |
+//                                         /* Enable pull-down function */
+//                                         IOPCTL_PIO_PULLDOWN_EN |
+//                                         /* Disable input buffer function */
+//                                         IOPCTL_PIO_INBUF_DI |
+//                                         /* Normal mode */
+//                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
+//                                         /* Full drive enable */
+//                                         IOPCTL_PIO_FULLDRIVE_EN |
+//                                         /* Analog mux is disabled */
+//                                         IOPCTL_PIO_ANAMUX_DI |
+//                                         /* Pseudo Output Drain is disabled */
+//                                         IOPCTL_PIO_PSEDRAIN_DI |
+//                                         /* Input function is not inverted */
+//                                         IOPCTL_PIO_INV_DI);
+//    /* PORT1 PIN10 (coords: F2) is configured as MCLK */
+//    IOPCTL_PinMuxSet(IOPCTL, 1U, 10U, port1_pin10_config);
 
     const uint32_t port1_pin3_config = (/* Pin is configured as FC5_SCK */
                                         IOPCTL_PIO_FUNC1 |
