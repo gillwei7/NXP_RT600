@@ -36,6 +36,8 @@
 /* usb descriptor length */
 #define USB_DESCRIPTOR_LENGTH_CONFIGURATION_ALL     (sizeof(g_UsbDeviceConfigurationDescriptor))
 #define USB_ENDPOINT_AUDIO_DESCRIPTOR_LENGTH        (9)
+#define USB_DESCRIPTOR_LENGTH_HID                   (9U)
+#define USB_DESCRIPTOR_LENGTH_HID_KEYBOARD_REPORT   (sizeof(g_UsbDeviceHidKeyboardReportDescriptor))
 #define USB_AUDIO_CLASS_SPECIFIC_ENDPOINT_LENGTH    (8)
 #define USB_AUDIO_CLOCK_SOURCE_LENGTH               (8)
 #define USB_DESCRIPTOR_LENGTH_AC_INTERRUPT_ENDPOINT (9)
@@ -56,7 +58,7 @@
 #define USB_DEVICE_CONFIGURATION_COUNT (1)
 #define USB_DEVICE_STRING_COUNT        (3)
 #define USB_DEVICE_LANGUAGE_COUNT      (1)
-#define USB_DEVICE_INTERFACE_COUNT     (3)
+#define USB_DEVICE_INTERFACE_COUNT     (4)
 #define USB_AUDIO_ENDPOINT_COUNT       (1)
 
 #define USB_AUDIO_SPEAKER_CONFIGURE_INDEX         (1)
@@ -64,6 +66,7 @@
 #define USB_AUDIO_CONTROL_INTERFACE_INDEX         (0)
 #define USB_AUDIO_RECORDER_STREAM_INTERFACE_INDEX (1)
 #define USB_AUDIO_SPEAKER_STREAM_INTERFACE_INDEX  (2)
+#define USB_HID_KEYBOARD_INTERFACE_INDEX          (3)
 
 #define USB_AUDIO_CONTROL_INTERFACE_ALTERNATE_COUNT         (1)
 #define USB_AUDIO_RECORDER_STREAM_INTERFACE_ALTERNATE_COUNT (2)
@@ -74,6 +77,9 @@
 #define USB_AUDIO_SPEAKER_STREAM_INTERFACE_ALTERNATE_0      (0)
 #define USB_AUDIO_SPEAKER_STREAM_INTERFACE_ALTERNATE_1      (1)
 
+#define USB_HID_KEYBOARD_INTERFACE_ALTERNATE_COUNT (1)
+#define USB_HID_KEYBOARD_INTERFACE_ALTERNATE_0     (0)
+
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 #define USB_AUDIO_SPEAKER_STREAM_ENDPOINT_COUNT (1)
 #else
@@ -81,18 +87,21 @@
 #endif
 #define USB_AUDIO_CONTROL_ENDPOINT_COUNT         (1)
 #define USB_AUDIO_RECORDER_STREAM_ENDPOINT_COUNT (1)
+#define USB_HID_KEYBOARD_ENDPOINT_COUNT          (2)//(1)
 
-#define USB_AUDIO_SPEAKER_STREAM_ENDPOINT (2)
-#define USB_AUDIO_CONTROL_ENDPOINT        (1)
+#define USB_AUDIO_SPEAKER_STREAM_ENDPOINT (4)
+#define USB_AUDIO_CONTROL_ENDPOINT        (5)
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 #else
 /*If multiple data endpoints are to be serviced by the same feedback endpoint, the data endpoints must have ascending
 ordered-but not necessarily consecutive-endpoint numbers. The first data endpoint and the feedback endpoint must have
 the same endpoint number (and opposite direction). For more information, please refer to Universal Serial Bus
 Specification, Revision 2.0 chapter 9.6.6*/
-#define USB_AUDIO_SPEAKER_FEEDBACK_ENDPOINT (2)
+#define USB_AUDIO_SPEAKER_FEEDBACK_ENDPOINT (4)
 #endif
 #define USB_AUDIO_RECORDER_STREAM_ENDPOINT (3)
+#define USB_HID_KEYBOARD_ENDPOINT          (1)
+#define USB_HID_KEYBOARD_OUT_ENDPOINT	   (2)
 
 #define USB_AUDIO_COMPOSITE_INTERFACE_COUNT                                                 \
     (USB_AUDIO_SPEAKER_CONTROL_INTERFACE_COUNT + USB_AUDIO_SPEAKER_STREAM_INTERFACE_COUNT + \
@@ -100,6 +109,7 @@ Specification, Revision 2.0 chapter 9.6.6*/
 #define USB_AUDIO_SPEAKER_CONTROL_INTERFACE_COUNT (1)
 #define USB_AUDIO_SPEAKER_STREAM_INTERFACE_COUNT  (1)
 #define USB_AUDIO_RECORDER_STREAM_INTERFACE_COUNT (1)
+#define USB_HID_KEYBOARD_INTERFACE_COUNT          (1)
 
 #define AUDIO_IN_SAMPLING_RATE_KHZ  (48)
 #define AUDIO_OUT_SAMPLING_RATE_KHZ (48)
@@ -178,6 +188,16 @@ to initialize out and in sample rate respectively*/
 #define FS_ISO_FEEDBACK_ENDP_PACKET_SIZE (3)
 #endif
 #endif
+#define HS_HID_KEYBOARD_INTERRUPT_IN_PACKET_SIZE (64U)
+#define FS_HID_KEYBOARD_INTERRUPT_IN_PACKET_SIZE (64U)
+#define HS_HID_KEYBOARD_INTERRUPT_IN_INTERVAL    (0x10U) /* 2^(6-1) = 4ms */
+#define FS_HID_KEYBOARD_INTERRUPT_IN_INTERVAL    (0x10U)
+
+//TODO:
+#define HS_HID_KEYBOARD_INTERRUPT_OUT_PACKET_SIZE (64U)
+#define FS_HID_KEYBOARD_INTERRUPT_OUT_PACKET_SIZE (64U)
+#define HS_HID_KEYBOARD_INTERRUPT_OUT_INTERVAL    (0x10U) /* 2^(6-1) = 4ms */
+#define FS_HID_KEYBOARD_INTERRUPT_OUT_INTERVAL    (0x10U)
 
 #define HS_ISO_FEEDBACK_ENDP_INTERVAL (0x04U)
 #define FS_ISO_FEEDBACK_ENDP_INTERVAL (0x01U)
@@ -200,6 +220,9 @@ to initialize out and in sample rate respectively*/
 #else
 #define USB_AUDIO_PROTOCOL (0x00)
 #endif
+#define USB_HID_KEYBOARD_CLASS    (0x03)
+#define USB_HID_KEYBOARD_SUBCLASS (0x00)
+#define USB_HID_KEYBOARD_PROTOCOL (0x00)
 
 #define USB_AUDIO_STREAM_ENDPOINT_DESCRIPTOR    (0x25)
 #define USB_AUDIO_EP_GENERAL_DESCRIPTOR_SUBTYPE (0x01)
@@ -215,6 +238,8 @@ to initialize out and in sample rate respectively*/
 #define USB_AUDIO_SPEAKER_CONTROL_INPUT_TERMINAL_ID  (0x04)
 #define USB_AUDIO_SPEAKER_CONTROL_FEATURE_UNIT_ID    (0x05)
 #define USB_AUDIO_SPEAKER_CONTROL_OUTPUT_TERMINAL_ID (0x06)
+
+#define USB_HID_KEYBOARD_REPORT_LENGTH (64U)//(0x01U)
 
 /*******************************************************************************
  * API
@@ -258,6 +283,8 @@ usb_status_t USB_DeviceGetConfigurationDescriptor(
 usb_status_t USB_DeviceGetStringDescriptor(usb_device_handle handle,
                                            usb_device_get_string_descriptor_struct_t *stringDescriptor);
 
+usb_status_t USB_DeviceGetHidReportDescriptor(usb_device_handle handle,
+                                              usb_device_get_hid_report_descriptor_struct_t *hidReportDescriptor);
 #if (defined(USB_DEVICE_CONFIG_CV_TEST) && (USB_DEVICE_CONFIG_CV_TEST > 0U))
 /* Get device qualifier descriptor request */
 usb_status_t USB_DeviceGetDeviceQualifierDescriptor(

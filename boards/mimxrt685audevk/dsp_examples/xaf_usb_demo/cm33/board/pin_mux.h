@@ -70,6 +70,21 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_LED0853_PIN_MASK (1U << 15U)               /*!<@brief PORT pin mask */
                                                                   /* @} */
 
+/*! @name PIO0_3 (coord H2), SW_TYM
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_SW_TYM_PERIPHERAL GPIO          /*!<@brief Peripheral name */
+#define BOARD_INITPINS_SW_TYM_SIGNAL PIO0              /*!<@brief Signal name */
+#define BOARD_INITPINS_SW_TYM_CHANNEL 3                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_SW_TYM_GPIO GPIO                /*!<@brief GPIO peripheral base pointer */
+#define BOARD_INITPINS_SW_TYM_GPIO_PIN_MASK (1U << 3U) /*!<@brief GPIO pin mask */
+#define BOARD_INITPINS_SW_TYM_PORT 0U                  /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_SW_TYM_PIN 3U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_SW_TYM_PIN_MASK (1U << 3U)      /*!<@brief PORT pin mask */
+                                                       /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

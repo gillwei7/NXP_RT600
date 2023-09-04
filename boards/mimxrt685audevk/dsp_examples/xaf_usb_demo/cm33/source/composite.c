@@ -6,12 +6,25 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include "usb_device_config.h"
+#include "usb.h"
+#include "usb_device.h"
 /*${standard_header_anchor}*/
+#include "usb_audio_config.h"
+#include "fsl_inputmux.h"
+#include "fsl_pint.h"
+#include "usb_device_class.h"
+#include "usb_device_hid.h"
+#include "usb_device_audio.h"
+#include "usb_device_ch9.h"
+#include "usb_device_descriptor.h"
 #include "composite.h"
 
 #include "fsl_device_registers.h"
-#include "clock_config.h"
 #include "fsl_debug_console.h"
+#include "pin_mux.h"
+#include "clock_config.h"
 #include "board.h"
 
 #if (defined(FSL_FEATURE_SOC_SYSMPU_COUNT) && (FSL_FEATURE_SOC_SYSMPU_COUNT > 0U))
@@ -21,12 +34,28 @@
 #include "usb_phy.h"
 #endif
 
+#include "usb_audio_config.h"
+#include "fsl_power.h"
+#include "fsl_inputmux.h"
+#include "fsl_pint.h"
+#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
+#include "fsl_ctimer.h"
+#endif
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+extern uint32_t USB_AudioSpeakerBufferSpaceUsed(void);
+#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
+void CTIMER_SOF_TOGGLE_HANDLER_PLL(uint32_t i);
+#else
+extern void USB_DeviceCalculateFeedback(void);
+#endif
+void BOARD_InitHardware(void);
+void USB_DeviceClockInit(void);
 void USB_DeviceIsrEnable(void);
 
 #if USB_DEVICE_CONFIG_USE_TASK
@@ -34,23 +63,46 @@ void USB_DeviceTaskFn(void *deviceHandle);
 #endif
 
 usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *param);
+extern usb_status_t USB_DeviceHidKeyboardAction(void);
+extern char *SW_GetName(void);
 extern void Init_Board_Audio(void);
 extern void USB_AudioSpeakerResetTask(void);
 extern void USB_DeviceAudioSpeakerStatusReset(void);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+extern usb_device_composite_struct_t g_composite;
+extern uint8_t audioPlayDataBuff[AUDIO_SPEAKER_DATA_WHOLE_BUFFER_COUNT_NORMAL * AUDIO_PLAY_BUFFER_SIZE_ONE_FRAME];
+extern uint8_t audioRecDataBuff[AUDIO_RECORDER_DATA_WHOLE_BUFFER_COUNT_NORMAL * FS_ISO_IN_ENDP_PACKET_SIZE];
+volatile bool g_ButtonPress = false;
+
+USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
+static uint8_t audioPlayDMATempBuff[AUDIO_PLAY_BUFFER_SIZE_ONE_FRAME];
+USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
+static uint8_t audioRecDMATempBuff[FS_ISO_IN_ENDP_PACKET_SIZE];
+
+// TYM_FW_add >>
+#define DEMO_PINT_PIN_INT0_SRC  kINPUTMUX_GpioPort0Pin3ToPintsel/* SW_TYM */
+// TYM_FW_add <<
 /* Composite device structure. */
 USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 usb_device_composite_struct_t g_composite;
+extern usb_device_class_struct_t g_UsbDeviceHidMouseClass;
 extern usb_device_class_struct_t g_UsbDeviceAudioClassRecorder;
 extern usb_device_class_struct_t g_UsbDeviceAudioClassSpeaker;
 extern volatile bool g_ButtonPress;
 extern usb_device_composite_struct_t *g_UsbDeviceComposite;
 extern usb_device_composite_struct_t *g_deviceAudioComposite;
 extern uint8_t audioFeedBackBuffer[4];
+
 /* USB device class information */
-static usb_device_class_config_struct_t g_CompositeClassConfig[2] = {{
+static usb_device_class_config_struct_t g_CompositeClassConfig[3] = {{
+                                                                         USB_DeviceHidKeyboardCallback,
+                                                                         (class_handle_t)NULL,
+                                                                         &g_UsbDeviceHidMouseClass,
+                                                                     },
+                                                                     {
                                                                          USB_DeviceAudioCompositeCallback,
                                                                          (class_handle_t)NULL,
                                                                          &g_UsbDeviceAudioClassRecorder,
@@ -62,17 +114,36 @@ static usb_device_class_config_struct_t g_CompositeClassConfig[2] = {{
                                                                      }
 
 };
-
 /* USB device class configuration information */
 static usb_device_class_config_list_struct_t g_UsbDeviceCompositeConfigList = {
     g_CompositeClassConfig,
     USB_DeviceCallback,
-    2,
+    3,
 };
+
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
+void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
+{
+    g_ButtonPress = true;
+}
+
+void BOARD_USB_AUDIO_KEYBOARD_Init(void)
+{
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt0, DEMO_PINT_PIN_INT0_SRC);
+    INPUTMUX_Deinit(INPUTMUX);
+
+    /* Initialize PINT */
+    PINT_Init(PINT);
+
+    /* Setup Pin Interrupt 0 for rising edge */
+    PINT_PinInterruptConfig(PINT, kPINT_PinInt0, kPINT_PinIntEnableRiseEdge, pint_intr_callback);
+    /* Enable callbacks for PINT0 by Index */
+    PINT_EnableCallbackByIndex(PINT, kPINT_PinInt0);
+}
 
 /*!
  * @brief USB device callback function.
@@ -91,7 +162,9 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
     uint16_t *temp16   = (uint16_t *)param;
     uint8_t *temp8     = (uint8_t *)param;
     uint8_t count      = 0U;
-
+#if  USB_HID_DEBUG_MSG
+    PRINTF("USB_DeviceCallback event:%d\r\n", event);
+#endif
     switch (event)
     {
         case kUSB_DeviceEventBusReset:
@@ -201,6 +274,7 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
                 g_composite.currentConfiguration = *temp8;
                 USB_DeviceAudioCompositeSetConfigure(g_composite.audioUnified.audioSpeakerHandle, *temp8);
                 USB_DeviceAudioCompositeSetConfigure(g_composite.audioUnified.audioRecorderHandle, *temp8);
+                USB_DeviceHidKeyboardSetConfigure(g_composite.hidKeyboard.hidHandle, *temp8);
                 error = kStatus_USB_Success;
             }
             else
@@ -213,7 +287,9 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
             {
                 uint8_t interface        = (uint8_t)((*temp16 & 0xFF00U) >> 0x08U);
                 uint8_t alternateSetting = (uint8_t)(*temp16 & 0x00FFU);
-
+#if USB_HID_DEBUG_MSG
+                PRINTF("kUSB_DeviceEventSetInterface interface:%d alternateSetting:%d\r\n", interface, alternateSetting );
+#endif
                 switch (interface)
                 {
                     case USB_AUDIO_CONTROL_INTERFACE_INDEX:
@@ -263,6 +339,12 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
 #endif
                         }
                         break;
+                    case USB_HID_KEYBOARD_INTERFACE_INDEX:
+                        if (alternateSetting < USB_HID_KEYBOARD_INTERFACE_ALTERNATE_COUNT)
+                        {
+                            error = kStatus_USB_Success;
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -310,6 +392,13 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
                 error = USB_DeviceGetStringDescriptor(handle, (usb_device_get_string_descriptor_struct_t *)param);
             }
             break;
+        case kUSB_DeviceEventGetHidReportDescriptor:
+            if (param)
+            {
+                error =
+                    USB_DeviceGetHidReportDescriptor(handle, (usb_device_get_hid_report_descriptor_struct_t *)param);
+            }
+            break;
 #if (defined(USB_DEVICE_CONFIG_CV_TEST) && (USB_DEVICE_CONFIG_CV_TEST > 0U))
         case kUSB_DeviceEventGetDeviceQualifierDescriptor:
             if (param)
@@ -336,6 +425,7 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
  */
 void USB_DeviceApplicationInit(void)
 {
+    USB_DeviceClockInit();
 #if (defined(FSL_FEATURE_SOC_SYSMPU_COUNT) && (FSL_FEATURE_SOC_SYSMPU_COUNT > 0U))
     SYSMPU_Enable(SYSMPU, 0);
 #endif /* FSL_FEATURE_SOC_SYSMPU_COUNT */
@@ -344,6 +434,7 @@ void USB_DeviceApplicationInit(void)
     g_composite.attach                           = 0U;
     g_composite.audioUnified.audioSpeakerHandle  = (class_handle_t)NULL;
     g_composite.audioUnified.audioRecorderHandle = (class_handle_t)NULL;
+    g_composite.hidKeyboard.hidHandle            = (class_handle_t)NULL;
     g_composite.deviceHandle                     = NULL;
 
     if (kStatus_USB_Success !=
@@ -356,14 +447,34 @@ void USB_DeviceApplicationInit(void)
     {
         usb_echo("USB device composite demo\r\n");
 
-        g_composite.audioUnified.audioRecorderHandle = g_UsbDeviceCompositeConfigList.config[0].classHandle;
-        g_composite.audioUnified.audioSpeakerHandle  = g_UsbDeviceCompositeConfigList.config[1].classHandle;
+        g_composite.hidKeyboard.hidHandle            = g_UsbDeviceCompositeConfigList.config[0].classHandle;
+        g_composite.audioUnified.audioRecorderHandle = g_UsbDeviceCompositeConfigList.config[1].classHandle;
+        g_composite.audioUnified.audioSpeakerHandle  = g_UsbDeviceCompositeConfigList.config[2].classHandle;
 
         USB_DeviceAudioCompositeInit(&g_composite);
+        USB_DeviceHidKeyboardInit(&g_composite);
     }
 
     USB_DeviceIsrEnable();
 
     /*Add one delay here to make the DP pull down long enough to allow host to detect the previous disconnection.*/
     SDK_DelayAtLeastUs(5000, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    USB_DeviceRun(g_composite.deviceHandle);
 }
+
+/*!
+ * @brief USB task function.
+ *
+ * This function runs the task for USB device.
+ *
+ * @return None.
+ */
+#if USB_DEVICE_CONFIG_USE_TASK
+void USB_DeviceTask(void *handle)
+{
+    while (1U)
+    {
+        USB_DeviceTaskFn(handle);
+    }
+}
+#endif

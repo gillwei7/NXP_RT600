@@ -20,6 +20,7 @@
 #include "fsl_gpio.h"
 #include "task.h"
 #include "fsl_usart.h"
+#include "usb_device_hid.h"
 // TYM FW add <<
 /*${header:end}*/
 
@@ -50,6 +51,8 @@ static shell_status_t shellEAPeffect(shell_handle_t shellHandle, int32_t argc, c
 // TYM DSP add >>
 static shell_status_t shellFlowDSP(shell_handle_t shellHandle, int32_t argc, char **argv);
 extern app_handle_t app;
+extern void USB_DeviceAudioRecorderStatusReset(void);
+extern void USB_DeviceAudioSpeakerStatusReset(void);
 // TYM DSP add <<
 
 /*${prototype:end}*/
@@ -123,6 +126,7 @@ static handleShellMessageCallback_t *g_handleShellMessageCallback;
 static void *g_handleShellMessageCallbackData;
 // TYM FW add >>
 extern int8_t FlowCmdStep;
+extern usb_device_composite_struct_t *g_UsbDeviceComposite;
 // TYM FW add <<
 /*${variable:end}*/
 
@@ -431,7 +435,7 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
     msg.param[2] = 32;      // TYM DSP set for TDM
     //PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
 
-    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
+    dsp_ipc_send_sync(&msg);;
 }
 void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
 {
@@ -752,7 +756,7 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                         }
                         else
                         {
-                            USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+                            //USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
                             uint8_t dest[64];
                             memset(dest, 0, sizeof(dest));
                             dest[0] = 1;
@@ -761,8 +765,10 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                             dest[3] = msg->param[0];
 
                             memcpy( &dest[4], msg->flow_msg, msg->param[0] );
-                            // TODO modify to serial manager write
-                            USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
+                            // TODO  Should use flag switch UART writing and USB_DeviceHidSend
+                            //USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
+                            USB_DeviceHidSend(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_ENDPOINT,
+                                                    dest, USB_HID_KEYBOARD_REPORT_LENGTH);
                         }
                 	}
                 	*notify_shell = true;

@@ -14,6 +14,7 @@ mcu_data: ksdk2_0
 processor_version: 13.0.1
 board: MIMXRT685-AUD-EVK
 pin_labels:
+- {pin_num: H2, pin_signal: PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3, label: SW_TYM, identifier: SW_TYM}
 - {pin_num: B1, pin_signal: PIO1_9/FC5_SSEL3/SCT0_GPI7/UTICK_CAP1/CTIMER1_MAT3/ADC0_12, label: WL_REG_ON, identifier: BOARD_INITPINS_WL_REG_ON;WL_REG_ON}
 - {pin_num: E2, pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D, label: 'J48[3]/JP30[1]', identifier: LED0853}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
@@ -57,6 +58,7 @@ BOARD_InitPins:
   - {pin_num: K16, peripheral: SYSCON, signal: MCLK, pin_signal: PIO1_10/MCLK/FREQME_GPIO_CLK/CTIMER_INP10/CLKOUT, pupdena: disabled, pupdsel: pullDown, ibena: disabled,
     slew_rate: normal, drive: full, amena: disabled, odena: disabled, iiena: disabled}
   - {pin_num: E2, peripheral: GPIO, signal: 'PIO2, 15', pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D, direction: OUTPUT}
+  - {pin_num: H2, peripheral: GPIO, signal: 'PIO0, 3', pin_signal: PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -206,6 +208,27 @@ void BOARD_InitPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT0 PIN2 (coords: G4) is configured as FC0_RXD_SDA_MOSI_DATA */
     IOPCTL_PinMuxSet(IOPCTL, 0U, 2U, port0_pin2_config);
+
+    const uint32_t SW_TYM = (/* Pin is configured as PIO0_3 */
+                             IOPCTL_PIO_FUNC0 |
+                             /* Disable pull-up / pull-down function */
+                             IOPCTL_PIO_PUPD_DI |
+                             /* Enable pull-down function */
+                             IOPCTL_PIO_PULLDOWN_EN |
+                             /* Enables input buffer function */
+                             IOPCTL_PIO_INBUF_EN |
+                             /* Normal mode */
+                             IOPCTL_PIO_SLEW_RATE_NORMAL |
+                             /* Normal drive */
+                             IOPCTL_PIO_FULLDRIVE_DI |
+                             /* Analog mux is disabled */
+                             IOPCTL_PIO_ANAMUX_DI |
+                             /* Pseudo Output Drain is disabled */
+                             IOPCTL_PIO_PSEDRAIN_DI |
+                             /* Input function is not inverted */
+                             IOPCTL_PIO_INV_DI);
+    /* PORT0 PIN3 (coords: H2) is configured as PIO0_3 */
+    IOPCTL_PinMuxSet(IOPCTL, BOARD_INITPINS_SW_TYM_PORT, BOARD_INITPINS_SW_TYM_PIN, SW_TYM);
 
     const uint32_t port1_pin10_config = (/* Pin is configured as MCLK */
                                          IOPCTL_PIO_FUNC1 |

@@ -26,6 +26,7 @@
          <pins_profile>
             <processor_version>13.0.1</processor_version>
             <pin_labels>
+               <pin_label pin_num="H2" pin_signal="PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3" label="SW_TYM" identifier="SW_TYM"/>
                <pin_label pin_num="B1" pin_signal="PIO1_9/FC5_SSEL3/SCT0_GPI7/UTICK_CAP1/CTIMER1_MAT3/ADC0_12" label="WL_REG_ON" identifier="BOARD_INITPINS_WL_REG_ON;WL_REG_ON"/>
                <pin_label pin_num="E2" pin_signal="PIO2_15/SCT0_OUT9/CLKIN/CMP0_D" label="J48[3]/JP30[1]" identifier="LED0853"/>
             </pin_labels>
@@ -141,6 +142,11 @@
                   <pin peripheral="GPIO" signal="PIO2, 15" pin_num="E2" pin_signal="PIO2_15/SCT0_OUT9/CLKIN/CMP0_D">
                      <pin_features>
                         <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIO" signal="PIO0, 3" pin_num="H2" pin_signal="PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
                      </pin_features>
                   </pin>
                </pins>
