@@ -339,14 +339,14 @@ int main(void)
             ;
     }
 
-//    /* Set shell command task priority = 1 */
-//    if (xTaskCreate(APP_Shell_Task, "Shell Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 1,
-//                    &app.shell_task_handle) != pdPASS)
-//    {
-//        PRINTF("\r\nFailed to create application task\r\n");
-//        while (1)
-//            ;
-//    }
+    /* Set shell command task priority = 1 */
+    if (xTaskCreate(APP_Shell_Task, "Shell Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 1,
+                    &app.shell_task_handle) != pdPASS)
+    {
+        PRINTF("\r\nFailed to create application task\r\n");
+        while (1)
+            ;
+    }
 
     /* Set Audio Path Init task priority = 2 */
     if (xTaskCreate(APP_Audio_Path_Init_Task, "Audio Path Init Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 2,

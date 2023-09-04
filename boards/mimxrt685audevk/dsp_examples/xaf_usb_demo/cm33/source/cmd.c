@@ -434,8 +434,9 @@ void send_FlowPathInit_Cmd(char flowPathInitChar)
 //    msg.param[1] = 16000; // DMIC in 16k
     msg.param[2] = 32;      // TYM DSP set for TDM
     //PRINTF("[TYM][CM33] Send shellLineInOut command %d, %d, %d. \r\n",msg.param[0], msg.param[1], msg.param[2]);
-
-    dsp_ipc_send_sync(&msg);;
+// TODO Check use USB_HID work or not
+//    dsp_ipc_send_sync(&msg);
+    g_handleShellMessageCallback(&msg, g_handleShellMessageCallbackData);
 }
 void send_FlowStudio_Cmd(char* flowCmdCharPtr, uint32_t cmdLength)
 {
@@ -756,7 +757,7 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                         }
                         else
                         {
-                            //USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
+                            USART_Type *const s_UsartAdapterBase[] = USART_BASE_PTRS;
                             uint8_t dest[64];
                             memset(dest, 0, sizeof(dest));
                             dest[0] = 1;
@@ -765,8 +766,8 @@ static void handleDSPMessageInner(app_handle_t *app, srtm_message *msg, bool *no
                             dest[3] = msg->param[0];
 
                             memcpy( &dest[4], msg->flow_msg, msg->param[0] );
-                            // TODO  Should use flag switch UART writing and USB_DeviceHidSend
-                            //USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
+                            // TODO  do both UART writing and USB_DeviceHidSend
+                            USART_WriteBlocking(s_UsartAdapterBase[0], dest, 4 + msg->param[0]);
                             USB_DeviceHidSend(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_ENDPOINT,
                                                     dest, USB_HID_KEYBOARD_REPORT_LENGTH);
                         }
