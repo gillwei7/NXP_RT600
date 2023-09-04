@@ -22,6 +22,7 @@
 
 #include "srtm_config.h"
 #include "dsp_ipc.h"
+#include "main_cm33.h"
 
 /*******************************************************************************
  * Definitions
@@ -30,7 +31,6 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-usb_status_t USB_DeviceHidKeyboardAction(void);
 
 /*******************************************************************************
  * Variables
@@ -41,36 +41,10 @@ static uint8_t s_KeyboardBuffer[USB_HID_KEYBOARD_REPORT_LENGTH * 2];
 static uint8_t s_KeyboardBufferOut[USB_HID_KEYBOARD_REPORT_LENGTH * 2];
 usb_device_composite_struct_t *g_UsbDeviceComposite;
 static usb_device_hid_keyboard_struct_t s_UsbDeviceHidKeyboard;
-extern volatile bool g_ButtonPress;
-extern volatile bool g_CodecSpeakerMuteUnmute;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if USB_HID_DEBUG_MSG
-    usb_status_t USB_DeviceHidKeyboardAction(void)
-    {
-        if (g_ButtonPress)
-        {
-            s_UsbDeviceHidKeyboard.buffer[0] = 0x04U;
-            g_ButtonPress                    = false;
-            return USB_DeviceHidSend(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_ENDPOINT,
-                                     s_UsbDeviceHidKeyboard.buffer, USB_HID_KEYBOARD_REPORT_LENGTH);
-        }
-        else if (g_CodecSpeakerMuteUnmute)
-        {
-            s_UsbDeviceHidKeyboard.buffer[0] = 0x00U;
-            g_CodecSpeakerMuteUnmute         = false;
-            return USB_DeviceHidSend(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_ENDPOINT,
-                                     s_UsbDeviceHidKeyboard.buffer, USB_HID_KEYBOARD_REPORT_LENGTH);
-        }
-        else
-        {
-            return kStatus_USB_Success;
-        }
-    }
-#endif
-
 usb_status_t USB_DeviceHidKeyboardCallback(class_handle_t handle, uint32_t event, void *param)
 {
     usb_status_t error = kStatus_USB_InvalidRequest;
@@ -142,8 +116,6 @@ usb_status_t USB_DeviceHidKeyboardSetConfigure(class_handle_t handle, uint8_t co
     {
         USB_DeviceHidRecv(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_OUT_ENDPOINT,
                                  s_UsbDeviceHidKeyboard.bufferOut, USB_HID_KEYBOARD_REPORT_LENGTH);
-        // Keep USB_DeviceHidKeyboardAction but not worked
-        //return USB_DeviceHidKeyboardAction(); /* run the cursor movement code */
         return kStatus_USB_Success;
     }
     return kStatus_USB_Error;
@@ -155,8 +127,6 @@ usb_status_t USB_DeviceHidKeyboardSetInterface(class_handle_t handle, uint8_t in
     {
         USB_DeviceHidRecv(g_UsbDeviceComposite->hidKeyboard.hidHandle, USB_HID_KEYBOARD_OUT_ENDPOINT,
                                  s_UsbDeviceHidKeyboard.bufferOut, USB_HID_KEYBOARD_REPORT_LENGTH);
-        // Keep USB_DeviceHidKeyboardAction but not worked
-        //return USB_DeviceHidKeyboardAction(); /* run the cursor movement code */
         return kStatus_USB_Success;
     }
     return kStatus_USB_Error;

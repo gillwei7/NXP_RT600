@@ -41,6 +41,8 @@
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 #include "fsl_ctimer.h"
 #endif
+#include "main_cm33.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -72,26 +74,17 @@ extern void USB_DeviceAudioSpeakerStatusReset(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-extern usb_device_composite_struct_t g_composite;
-extern uint8_t audioPlayDataBuff[AUDIO_SPEAKER_DATA_WHOLE_BUFFER_COUNT_NORMAL * AUDIO_PLAY_BUFFER_SIZE_ONE_FRAME];
-extern uint8_t audioRecDataBuff[AUDIO_RECORDER_DATA_WHOLE_BUFFER_COUNT_NORMAL * FS_ISO_IN_ENDP_PACKET_SIZE];
-volatile bool g_ButtonPress = false;
-
 USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 static uint8_t audioPlayDMATempBuff[AUDIO_PLAY_BUFFER_SIZE_ONE_FRAME];
 USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 static uint8_t audioRecDMATempBuff[FS_ISO_IN_ENDP_PACKET_SIZE];
 
-// TYM_FW_add >>
-#define DEMO_PINT_PIN_INT0_SRC  kINPUTMUX_GpioPort0Pin3ToPintsel/* SW_TYM */
-// TYM_FW_add <<
 /* Composite device structure. */
 USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 usb_device_composite_struct_t g_composite;
 extern usb_device_class_struct_t g_UsbDeviceHidMouseClass;
 extern usb_device_class_struct_t g_UsbDeviceAudioClassRecorder;
 extern usb_device_class_struct_t g_UsbDeviceAudioClassSpeaker;
-extern volatile bool g_ButtonPress;
 extern usb_device_composite_struct_t *g_UsbDeviceComposite;
 extern usb_device_composite_struct_t *g_deviceAudioComposite;
 extern uint8_t audioFeedBackBuffer[4];
@@ -125,26 +118,6 @@ static usb_device_class_config_list_struct_t g_UsbDeviceCompositeConfigList = {
 /*******************************************************************************
  * Code
  ******************************************************************************/
-void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
-{
-    g_ButtonPress = true;
-}
-
-void BOARD_USB_AUDIO_KEYBOARD_Init(void)
-{
-    INPUTMUX_Init(INPUTMUX);
-    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt0, DEMO_PINT_PIN_INT0_SRC);
-    INPUTMUX_Deinit(INPUTMUX);
-
-    /* Initialize PINT */
-    PINT_Init(PINT);
-
-    /* Setup Pin Interrupt 0 for rising edge */
-    PINT_PinInterruptConfig(PINT, kPINT_PinInt0, kPINT_PinIntEnableRiseEdge, pint_intr_callback);
-    /* Enable callbacks for PINT0 by Index */
-    PINT_EnableCallbackByIndex(PINT, kPINT_PinInt0);
-}
-
 /*!
  * @brief USB device callback function.
  *

@@ -45,7 +45,6 @@ void CTIMER_SOF_TOGGLE_HANDLER_PLL(uint32_t i);
 #else
 extern void USB_DeviceCalculateFeedback(void);
 #endif
-extern void BOARD_USB_AUDIO_KEYBOARD_Init(void);
 extern usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *param);
 extern void USB_DeviceApplicationInit(void);
 
@@ -242,46 +241,6 @@ void APP_DSP_IPC_Task(void *param)
     }
 }
 
-#if USB_HID_DEBUG_MSG
-    /*!
-     * @brief Application task function.
-     *
-     * This function runs the task for application.
-     *
-     * @return None.
-     */
-    void USB_Device_Task(void *handle)
-    {
-        PRINTF("[USB_Device_Task] start\r\n");
-
-    #if USB_DEVICE_CONFIG_USE_TASK
-        if (g_composite.deviceHandle)
-        {
-            if (xTaskCreate(USB_DeviceTask,                  /* pointer to the task */
-                            (char const *)"usb device task", /* task name for kernel awareness debugging */
-                            5000L / sizeof(portSTACK_TYPE),  /* task stack size */
-                            g_composite.deviceHandle,        /* optional task startup argument */
-                            5,                               /* initial priority */
-                            &g_composite.deviceTaskHandle    /* optional task handle to create */
-                            ) != pdPASS)
-            {
-                usb_echo("usb device task create failed!\r\n");
-                return;
-            }
-        }
-    #endif
-
-        while (1)
-        {
-            USB_DeviceHidKeyboardAction();
-
-            USB_AudioCodecTask();
-
-            USB_AudioSpeakerResetTask();
-        }
-    }
-#endif
-
 /*!
  * @brief Main function
  */
@@ -324,8 +283,6 @@ int main(void)
 #if DSP_IMAGE_COPY_TO_RAM
     PRINTF("DSP image copied to DSP TCM\r\n");
 #endif
-
-    BOARD_USB_AUDIO_KEYBOARD_Init();
 
     /* Initialize USB */
     USB_DeviceApplicationInit();
