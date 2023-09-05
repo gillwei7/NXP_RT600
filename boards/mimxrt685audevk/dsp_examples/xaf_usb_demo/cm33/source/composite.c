@@ -13,7 +13,6 @@
 /*${standard_header_anchor}*/
 #include "usb_audio_config.h"
 #include "fsl_inputmux.h"
-#include "fsl_pint.h"
 #include "usb_device_class.h"
 #include "usb_device_hid.h"
 #include "usb_device_audio.h"
@@ -37,7 +36,6 @@
 #include "usb_audio_config.h"
 #include "fsl_power.h"
 #include "fsl_inputmux.h"
-#include "fsl_pint.h"
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 #include "fsl_ctimer.h"
 #endif
