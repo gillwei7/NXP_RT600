@@ -250,9 +250,10 @@ static int renderer_start_operation(void *p_comp)
 
 
 // TYM DSP add >>
-#define BUF_SIZE 512 * 1024
-//AT_QUICKACCESS_SECTION_DATA (uint8_t MEMPOOL_BUF[BUF_SIZE]);
-uint8_t* MEMPOOL_BUF;
+#define BUF_SIZE 1024 * 1024
+AT_QUICKACCESS_SECTION_CODE (uint8_t MEMPOOL_BUF[BUF_SIZE]);
+//uint8_t* MEMPOOL_BUF;
+
 static uint8_t FlowExecOnce = 0;
 FlowEngine*	engine = NULL;
 
@@ -340,7 +341,7 @@ int srtm_line_inout_init(dsp_handle_t *dsp, unsigned int *pCmdParams, bool i2s)
     }
     if (FlowExecOnce == 0)
 	{
-    	MEMPOOL_BUF = malloc(BUF_SIZE);
+//    	MEMPOOL_BUF = malloc(BUF_SIZE);
 		FlowEngine_Mempool_Create(MEMPOOL_BUF, BUF_SIZE);
 		engine = FlowEngine_create("engine", NULL, 8, 8);
 		FlowEngine_prepare(engine, 48000, 32);
