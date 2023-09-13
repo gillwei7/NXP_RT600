@@ -55,7 +55,7 @@
  */
 
 /*! @brief HID instance count */
-#define USB_DEVICE_CONFIG_HID (0U)
+#define USB_DEVICE_CONFIG_HID (1U)
 
 /*! @brief CDC ACM instance count */
 #define USB_DEVICE_CONFIG_CDC_ACM (0U)
@@ -97,7 +97,7 @@
 #define USB_DEVICE_CONFIG_SELF_POWER (1U)
 
 /*! @brief How many endpoints are supported in the stack. */
-#define USB_DEVICE_CONFIG_ENDPOINTS (5U)
+#define USB_DEVICE_CONFIG_ENDPOINTS (6U)//(5U)
 
 /*! @brief Whether the device task is enabled. */
 #define USB_DEVICE_CONFIG_USE_TASK (0U)
@@ -110,6 +110,11 @@
 
 /*! @brief Whether device CV test is enabled. */
 #define USB_DEVICE_CONFIG_CV_TEST (0U)
+
+/*! @brief Whether device supports ROOT2 test. ROOT2 is only tested on RT685. */
+#ifndef USB_DEVICE_CONFIG_ROOT2_TEST
+#define USB_DEVICE_CONFIG_ROOT2_TEST (1U)
+#endif
 
 /*! @brief Whether device compliance test is enabled. If the macro is enabled,
     the test mode and CV test macroes will be set.*/

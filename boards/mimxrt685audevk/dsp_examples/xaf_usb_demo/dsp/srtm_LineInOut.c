@@ -253,6 +253,7 @@ static int renderer_start_operation(void *p_comp)
 #define BUF_SIZE 1024 * 1024
 AT_QUICKACCESS_SECTION_CODE (uint8_t MEMPOOL_BUF[BUF_SIZE]);
 //uint8_t* MEMPOOL_BUF;
+
 static uint8_t FlowExecOnce = 0;
 FlowEngine*	engine = NULL;
 

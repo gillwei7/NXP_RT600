@@ -58,8 +58,7 @@
                     <KeyValueListMapEntry>
                         <key>Defines</key>
                         <value flag="-D" inheritance="donotinherit">
-                            <ListEntry key="DEBUG" value=""/>
-                            <ListEntry key="XF_DEBUG" value="1"/>
+                            <ListEntry key="NDEBUG" value=""/>
                             <ListEntry key="XA_CAPTURER" value="1"/>
                             <ListEntry key="XA_PCM_GAIN" value="1"/>
                             <ListEntry key="XA_CLIENT_PROXY" value="1"/>
@@ -116,12 +115,8 @@
                 </SingleFlagMapOptions>
                 <FlagValueMapOptions>
                     <FlagValueMapEntry>
-                        <key>Debug</key>
-                        <value level="-3" flag="-g" use="true"/>
-                    </FlagValueMapEntry>
-                    <FlagValueMapEntry>
                         <key>Optimization</key>
-                        <value level="2" flag="-O" use="true"/>
+                        <value level="3" flag="-O" use="true"/>
                     </FlagValueMapEntry>
                 </FlagValueMapOptions>
                 <StringListMapOptions>
@@ -143,6 +138,10 @@
                 <BooleanMapOptions>
                     <BooleanMapEntry>
                         <key>CreateMinsize</key>
+                        <value selected="true"/>
+                    </BooleanMapEntry>
+                    <BooleanMapEntry>
+                        <key>GenerateMapFile</key>
                         <value selected="true"/>
                     </BooleanMapEntry>
                 </BooleanMapOptions>

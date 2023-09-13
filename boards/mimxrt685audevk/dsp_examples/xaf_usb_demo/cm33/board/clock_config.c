@@ -170,7 +170,7 @@ void BOARD_BootClockRUN(void)
     POWER_UpdateOscSettlingTime(BOARD_SYSOSC_SETTLING_US); /* Updated XTAL oscillator settling time */
     CLOCK_EnableSysOscClk(true, true, BOARD_SYSOSC_SETTLING_US); /* Enable system OSC */
     CLOCK_SetXtalFreq(BOARD_XTAL_SYS_CLK_HZ);              /* Sets external XTAL OSC freq */
-
+    CLOCK_SetMclkFreq(24576000U);                 /* Sets external MCLKIN freq */
     /* Configure SysPLL0 clock source */
     CLOCK_InitSysPll(&g_sysPllConfig_BOARD_BootClockRUN);
     CLOCK_InitSysPfd(kCLOCK_Pfd0, 19);                /* Enable MAIN PLL clock */
@@ -184,6 +184,8 @@ void BOARD_BootClockRUN(void)
 
     /* Set up clock selectors - Attach clocks to the peripheries */
     CLOCK_AttachClk(kMAIN_PLL_to_MAIN_CLK);                 /* Switch MAIN_CLK to MAIN_PLL */
+    CLOCK_AttachClk(kMASTER_CLK_to_FLEXCOMM1);                 /* Switch FLEXCOMM1 to MASTER_CLK */
+    CLOCK_AttachClk(kMASTER_CLK_to_FLEXCOMM2);                 /* Switch FLEXCOMM2 to MASTER_CLK */
 
     /* Set up dividers */
     CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 15U);         /* Set AUDIOPLLCLKDIV divider to value 15 */

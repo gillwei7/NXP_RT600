@@ -17,6 +17,7 @@
 
 #define CUSTOM_SHELL_TASK          1
 #define AUDIO_PATH_INIT_MS         5000
+#define USB_HID_DEBUG_MSG          0
 
 /*******************************************************************************
  * Definitions

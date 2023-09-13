@@ -247,6 +247,7 @@ static void RxCaptureCallbackISR(struct _dma_handle *handle, void *userData, boo
             portYIELD_FROM_ISR(woken);
 #else
             xos_sem_put(&d->irq_sem);
+            xos_thread_yield();
 #endif
         }
         else

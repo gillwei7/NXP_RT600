@@ -22,7 +22,10 @@
 /* Other USB headers */
 #include "usb_device_descriptor.h"
 #include "audio_unified.h"
-
+#include "hid_keyboard.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "event_groups.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -50,7 +53,13 @@
 #endif
 #endif
 
+#if defined(__GIC_PRIO_BITS)
+#define USB_DEVICE_INTERRUPT_PRIORITY (25U)
+#elif defined(__NVIC_PRIO_BITS) && (__NVIC_PRIO_BITS >= 3)
+#define USB_DEVICE_INTERRUPT_PRIORITY (6U)
+#else
 #define USB_DEVICE_INTERRUPT_PRIORITY (3U)
+#endif
 
 #define AUDIO_SAMPLING_RATE_TO_10_14 (AUDIO_OUT_SAMPLING_RATE_KHZ << 10)
 #if defined(USB_DEVICE_CONFIG_LPCIP3511HS) && (USB_DEVICE_CONFIG_LPCIP3511HS > 0U)
@@ -163,6 +172,9 @@ typedef struct _usb_device_composite_struct
 {
     usb_device_handle deviceHandle;
     usb_audio_composite_struct_t audioUnified;
+    usb_device_hid_keyboard_struct_t hidKeyboard;
+    TaskHandle_t applicationTaskHandle;
+    TaskHandle_t deviceTaskHandle;
     uint8_t speed;
     uint8_t attach;
     uint8_t currentConfiguration;
@@ -215,12 +227,40 @@ extern usb_status_t USB_DeviceAudioSpeakerSetInterface(class_handle_t handle,
                                                        uint8_t alternateSetting);
 
 /*!
- * @brief Application initialization function.
+ * @brief HID class specific callback function.
  *
- * This function initializes the application.
+ * This function handles the HID class specific requests.
  *
- * @return None.
+ * @param handle		  The HID class handle.
+ * @param event 		  The HID class event type.
+ * @param param 		  The parameter of the class specific request.
+ *
+ * @return A USB error code or kStatus_USB_Success.
  */
-void USB_DeviceApplicationInit(void);
+extern usb_status_t USB_DeviceHidKeyboardCallback(class_handle_t handle, uint32_t event, void *param);
+/*!
+ * @brief HID device set configuration function.
+ *
+ * This function sets configuration for HID class.
+ *
+ * @param handle The HID class handle.
+ * @param configure The HID class configure index.
+ *
+ * @return A USB error code or kStatus_USB_Success.
+ */
+extern usb_status_t USB_DeviceHidKeyboardSetConfigure(class_handle_t handle, uint8_t configure);
+extern usb_status_t USB_DeviceHidKeyboardSetInterface(class_handle_t handle,
+                                                      uint8_t interface,
+                                                      uint8_t alternateSetting);
+/*!
+ * @brief HID device initialization function.
+ *
+ * This function initializes the device with the composite device class information.
+ *
+ * @param device_composite The pointer to the composite device structure.
+ *
+ * @return A USB error code or kStatus_USB_Success.
+ */
+extern usb_status_t USB_DeviceHidKeyboardInit(usb_device_composite_struct_t *device_composite);
 
 #endif
