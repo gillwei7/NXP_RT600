@@ -24,9 +24,12 @@
 #include "dsp_config.h"
 #include "fsl_power.h"
 #include "fsl_pca9420.h"
+
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 #include "fsl_ctimer.h"
 #endif
+#include "usb_device_hid.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -36,13 +39,14 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-int BOARD_CODEC_Init(void);
 void USB_DeviceClockInit(void);
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 void CTIMER_SOF_TOGGLE_HANDLER_PLL(uint32_t i);
 #else
 extern void USB_DeviceCalculateFeedback(void);
 #endif
+extern usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *param);
+extern void USB_DeviceApplicationInit(void);
 
 /*******************************************************************************
  * Variables
@@ -53,13 +57,15 @@ extern usb_device_composite_struct_t g_composite;
 ctimer_callback_t *cb_func_pll[] = {(ctimer_callback_t *)CTIMER_SOF_TOGGLE_HANDLER_PLL};
 static ctimer_config_t ctimerInfoPll;
 #endif
+
 app_handle_t app;
-extern serial_handle_t g_serialHandle;
-static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_serialReadHandle);
 extern int8_t FlowCmdStep;
+extern usb_device_composite_struct_t *g_UsbDeviceComposite;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
 void USB_DeviceClockInit(void)
 {
     uint8_t usbClockDiv = 1;
@@ -139,7 +145,6 @@ void CTIMER_CaptureInit(void)
     /* Start the L counter */
     CTIMER_StartTimer(CTIMER0);
 }
-#endif
 
 void USB_IRQHandler(void)
 {
@@ -157,6 +162,7 @@ void USB_DeviceIsrEnable(void)
     NVIC_SetPriority((IRQn_Type)irqNumber, USB_DEVICE_INTERRUPT_PRIORITY);
     EnableIRQ((IRQn_Type)irqNumber);
 }
+#endif
 
 #if USB_DEVICE_CONFIG_USE_TASK
 void USB_DeviceTaskFn(void *deviceHandle)
@@ -238,6 +244,7 @@ void APP_DSP_IPC_Task(void *param)
 /*!
  * @brief Main function
  */
+
 int main(void)
 {
     int ret;
@@ -259,7 +266,7 @@ int main(void)
     CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
     SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
 
-    USB_DeviceClockInit();
+//    USB_DeviceApplicationInit();//USB_DeviceClockInit();
 
     PRINTF("\r\n");
     PRINTF("******************************\r\n");
