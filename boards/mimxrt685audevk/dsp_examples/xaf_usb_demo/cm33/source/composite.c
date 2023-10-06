@@ -40,10 +40,15 @@
 #include "fsl_ctimer.h"
 #endif
 #include "main_cm33.h"
-
+#include "fsl_wwdt.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define WWDT                WWDT0
+#define WDT_CLK_FREQ        CLOCK_GetWdtClkFreq(1U)
+#define APP_WDT_IRQn        WDT0_IRQn
+#define APP_WDT_IRQ_HANDLER WDT0_IRQHandler
+#define WDT_CLK_FREQ        CLOCK_GetWdtClkFreq(1U)
 
 /*******************************************************************************
  * Prototypes
@@ -380,6 +385,40 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
             }
             break;
 #endif
+        case kUSB_DeviceEventDetach:
+            PRINTF("USB_DeviceCallback: kUSB_DeviceEventDetach\r\n");
+
+            /* Initialize Watch Dog Timer */
+                wwdt_config_t config;
+                uint32_t wdtFreq;
+
+                /* The WDT divides the input frequency into it by 4 */
+                wdtFreq = WDT_CLK_FREQ / 4;
+
+                WWDT_GetDefaultConfig(&config);
+
+                /*
+                 * Set watchdog feed time constant to approximately 4s
+                 * Set watchdog warning time to 512 ticks after feed time constant
+                 * Set watchdog window time to 1s
+                 */
+                config.timeoutValue = wdtFreq * 4;
+                config.warningValue = 512;
+                config.windowValue  = wdtFreq * 1;
+                /* Configure WWDT to reset on timeout */
+                config.enableWatchdogReset = true;
+                /* Setup watchdog clock frequency(Hz). */
+                config.clockFreq_Hz = WDT_CLK_FREQ;
+
+                GPIO_PinWrite(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, 0);
+
+                WWDT_Init(WWDT, &config);
+                NVIC_EnableIRQ(APP_WDT_IRQn);
+
+            break;
+        case kUSB_DeviceEventAttach:
+            PRINTF("USB_DeviceCallback: kUSB_DeviceEventAttach\r\n");
+            break;
         default:
             break;
     }

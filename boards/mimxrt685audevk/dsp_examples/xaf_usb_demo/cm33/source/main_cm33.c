@@ -287,6 +287,7 @@ int main(void)
     /* Initialize USB */
     USB_DeviceApplicationInit();
 
+
     /* Set IPC processing task priority = 3 */
     if (xTaskCreate(APP_DSP_IPC_Task, "DSP Msg Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 3,
                     &app.ipc_task_handle) != pdPASS)
