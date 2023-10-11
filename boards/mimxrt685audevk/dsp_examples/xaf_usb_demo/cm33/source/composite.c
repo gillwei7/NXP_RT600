@@ -382,9 +382,6 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
             break;
 #endif
         case kUSB_DeviceEventDetach:
-            uint8_t irqNumber;
-            uint8_t usbDeviceIP3511Irq[] = USBHSD_IRQS;
-
             PRINTF("USB_DeviceCallback: kUSB_DeviceEventDetach\r\n");
             /* USB HID Endpoint cancel pending transfer */
             USB_DeviceCancel(g_composite.deviceHandle, USB_HID_KEYBOARD_ENDPOINT | (USB_IN << 7) );
@@ -394,11 +391,13 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
             USB_DeviceStop(g_composite.deviceHandle);
 
             /* Disable USB IRQ */
+            uint8_t irqNumber;
+            uint8_t usbDeviceIP3511Irq[] = USBHSD_IRQS;
             irqNumber                    = usbDeviceIP3511Irq[CONTROLLER_ID - kUSB_ControllerLpcIp3511Hs0];
             /* Install isr, set priority, and enable IRQ. */
             NVIC_SetPriority((IRQn_Type)irqNumber, USB_DEVICE_INTERRUPT_PRIORITY);
             DisableIRQ((IRQn_Type)irqNumber);
-            /* Initialize USB application again */
+
             USB_DeviceApplicationInit();
 
             break;
