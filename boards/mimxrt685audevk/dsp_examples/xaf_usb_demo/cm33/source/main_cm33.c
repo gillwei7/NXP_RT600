@@ -266,8 +266,6 @@ int main(void)
     CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
     SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
 
-//    USB_DeviceApplicationInit();//USB_DeviceClockInit();
-
     PRINTF("\r\n");
     PRINTF("******************************\r\n");
     PRINTF("DSP audio framework demo start\r\n");

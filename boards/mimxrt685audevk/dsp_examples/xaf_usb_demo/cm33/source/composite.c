@@ -44,11 +44,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define WWDT                WWDT0
-#define WDT_CLK_FREQ        CLOCK_GetWdtClkFreq(1U)
-#define APP_WDT_IRQn        WDT0_IRQn
-#define APP_WDT_IRQ_HANDLER WDT0_IRQHandler
-#define WDT_CLK_FREQ        CLOCK_GetWdtClkFreq(1U)
 
 /*******************************************************************************
  * Prototypes
@@ -62,6 +57,7 @@ extern void USB_DeviceCalculateFeedback(void);
 void BOARD_InitHardware(void);
 void USB_DeviceClockInit(void);
 void USB_DeviceIsrEnable(void);
+void USB_DeviceApplicationInit(void);
 
 #if USB_DEVICE_CONFIG_USE_TASK
 void USB_DeviceTaskFn(void *deviceHandle);
@@ -386,34 +382,24 @@ usb_status_t USB_DeviceCallback(usb_device_handle handle, uint32_t event, void *
             break;
 #endif
         case kUSB_DeviceEventDetach:
+            uint8_t irqNumber;
+            uint8_t usbDeviceIP3511Irq[] = USBHSD_IRQS;
+
             PRINTF("USB_DeviceCallback: kUSB_DeviceEventDetach\r\n");
+            /* USB HID Endpoint cancel pending transfer */
+            USB_DeviceCancel(g_composite.deviceHandle, USB_HID_KEYBOARD_ENDPOINT | (USB_IN << 7) );
+            USB_DeviceCancel(g_composite.deviceHandle, USB_HID_KEYBOARD_ENDPOINT | (USB_OUT << 7) );
+            USB_DeviceCancel(g_composite.deviceHandle, USB_HID_KEYBOARD_OUT_ENDPOINT | (USB_IN << 7) );
+            USB_DeviceCancel(g_composite.deviceHandle, USB_HID_KEYBOARD_OUT_ENDPOINT | (USB_OUT << 7) );
+            USB_DeviceStop(g_composite.deviceHandle);
 
-            /* Initialize Watch Dog Timer */
-                wwdt_config_t config;
-                uint32_t wdtFreq;
-
-                /* The WDT divides the input frequency into it by 4 */
-                wdtFreq = WDT_CLK_FREQ / 4;
-
-                WWDT_GetDefaultConfig(&config);
-
-                /*
-                 * Set watchdog feed time constant to approximately 4s
-                 * Set watchdog warning time to 512 ticks after feed time constant
-                 * Set watchdog window time to 1s
-                 */
-                config.timeoutValue = wdtFreq * 4;
-                config.warningValue = 512;
-                config.windowValue  = wdtFreq * 1;
-                /* Configure WWDT to reset on timeout */
-                config.enableWatchdogReset = true;
-                /* Setup watchdog clock frequency(Hz). */
-                config.clockFreq_Hz = WDT_CLK_FREQ;
-
-                GPIO_PinWrite(BOARD_INITPINS_LED0853_GPIO, BOARD_INITPINS_LED0853_PORT, BOARD_INITPINS_LED0853_PIN, 0);
-
-                WWDT_Init(WWDT, &config);
-                NVIC_EnableIRQ(APP_WDT_IRQn);
+            /* Disable USB IRQ */
+            irqNumber                    = usbDeviceIP3511Irq[CONTROLLER_ID - kUSB_ControllerLpcIp3511Hs0];
+            /* Install isr, set priority, and enable IRQ. */
+            NVIC_SetPriority((IRQn_Type)irqNumber, USB_DEVICE_INTERRUPT_PRIORITY);
+            DisableIRQ((IRQn_Type)irqNumber);
+            /* Initialize USB application again */
+            USB_DeviceApplicationInit();
 
             break;
         case kUSB_DeviceEventAttach:
