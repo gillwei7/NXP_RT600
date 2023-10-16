@@ -266,8 +266,6 @@ int main(void)
     CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
     SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
 
-//    USB_DeviceApplicationInit();//USB_DeviceClockInit();
-
     PRINTF("\r\n");
     PRINTF("******************************\r\n");
     PRINTF("DSP audio framework demo start\r\n");
@@ -286,6 +284,7 @@ int main(void)
 
     /* Initialize USB */
     USB_DeviceApplicationInit();
+
 
     /* Set IPC processing task priority = 3 */
     if (xTaskCreate(APP_DSP_IPC_Task, "DSP Msg Task", APP_TASK_STACK_SIZE, &app, tskIDLE_PRIORITY + 3,
